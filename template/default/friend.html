@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>友情链接</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+            line-height: 1.5;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        /* 全局变量 - 亮色默认 */
+        :root {
+            --bg: #f6f8fb;
+            --card: #ffffff;
+            --text: #111827;
+            --sub: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            --hover-bg: #f1f5f9;
+            --accent: #3b82f6;
+        }
+
+        /* 深色模式自动适配 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --card: #1e293b;
+                --text: #f8fafc;
+                --sub: #94a3b8;
+                --border: #334155;
+                --shadow: none;
+                --hover-bg: #2d3a4e;
+            }
+        }
+
+        /* 轮播专用额外覆盖 (保留一致风格) */
+        .carousel-section {
+            background: var(--card);
+            border-radius: 28px;
+            margin-bottom: 32px;
+            padding: 20px 16px 24px 16px;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+        }
+
+        .carousel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            padding-left: 6px;
+            color: var(--text);
+        }
+
+        .carousel-title span:first-child {
+            background: var(--accent);
+            width: 6px;
+            height: 24px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .swiper-container {
+            overflow: hidden;
+            border-radius: 24px;
+            position: relative;
+        }
+
+        .swiper-wrapper {
+            display: flex;
+            transition-timing-function: cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .swiper-slide {
+            flex-shrink: 0;
+            width: 100%;
+            background: var(--bg);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .friend-carousel-card {
+            display: flex;
+            flex-direction: column;
+            background: var(--card);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .friend-carousel-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .carousel-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            background: #e2e8f0;
+            display: block;
+        }
+
+        .carousel-info {
+            padding: 18px 16px 20px;
+        }
+
+        .carousel-info h3 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .carousel-desc {
+            color: var(--sub);
+            font-size: 0.9rem;
+            line-height: 1.45;
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .carousel-link-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* 移除导航按钮相关样式 - 删除上一个下一个按钮区域 */
+        /* .carousel-nav 和 .carousel-btn 已完全移除，不再显示 */
+
+        .dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--border);
+            border-radius: 10px;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            width: 24px;
+            background: var(--accent);
+        }
+
+        /* 卡片列表布局 (主要区域) */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 20px 40px;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.75);
+            border-bottom: 1px solid var(--border);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .header {
+                background: rgba(15, 23, 42, 0.85);
+            }
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: auto;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-img {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #cbd5e1;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .menu-btn {
+            border: none;
+            background: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 65px;
+            right: 20px;
+            width: 180px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .dropdown.show {
+            display: block;
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 14px 16px;
+            color: var(--text);
+        }
+
+        .dropdown a:hover {
+            background: rgba(0, 0, 0, 0.04);
+            text-decoration: none;
+        }
+
+        /* 搜索框已删除，对应的样式也移除，此处不再显示搜索输入框 */
+
+        .api-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 22px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .card:active {
+            transform: scale(0.99);
+        }
+
+        .card:hover {
+            background: var(--hover-bg);
+            border-color: var(--border);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .api-title {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 2.3;
+            word-break: break-word;
+            flex: 1;
+            color: var(--text);
+        }
+
+        /* 调用量迷你区域 (风格保留但无数据显示) */
+        .stats-mini {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 5px;
+            background: transparent;
+            padding: 0;
+        }
+
+        .stats-mini svg {
+            width: 12px;
+            height: 12px;
+            stroke: var(--sub);
+            stroke-width: 1.7;
+            fill: none;
+        }
+
+        .stats-mini .count-num {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--sub);
+        }
+
+        .card-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        /* 隐藏原本访问区块，完全挪动样式无需显示 */
+        .api-access {
+            display: none;
+        }
+
+        .doc-btn {
+            display: none;
+        }
+
+        .api-desc {
+            margin-top: 12px;
+            color: var(--sub);
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        .friend-image-thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            object-fit: cover;
+            background: #eef2ff;
+            border: 1px solid var(--border);
+        }
+
+        /* 空状态样式 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--card);
+            border-radius: 32px;
+            color: var(--sub);
+        }
+
+        /* loading 动画 */
+        .loading-skeleton {
+            background: var(--card);
+            border-radius: 22px;
+            padding: 18px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .skeleton-img {
+            width: 52px;
+            height: 52px;
+            background: var(--border);
+            border-radius: 16px;
+            animation: pulse 1.2s infinite;
+        }
+
+        .skeleton-text {
+            flex: 1;
+        }
+
+        .skeleton-line {
+            height: 18px;
+            background: var(--border);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            width: 80%;
+            animation: pulse 1.2s infinite;
+        }
+
+        .skeleton-line.short {
+            width: 60%;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        footer {
+            text-align: center;
+            padding: 32px 20px;
+            color: var(--sub);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 32px;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 16px;
+            }
+            .friend-image-thumb {
+                width: 42px;
+                height: 42px;
+            }
+            .carousel-info h3 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="nav">
+        <div class="logo">
+            <h1>友情链接</h1>
+        </div>
+        <button class="menu-btn" id="menuBtn" aria-label="菜单">☰</button>
+        <div class="dropdown" id="dropdown">
+            <a href="./#">首页</a>
+        </div>
+    </div>
+</div>
+
+<main class="container">
+    <!-- 轮播区块: 展示精彩推荐 + 自动轮播且无按钮，点击卡片即可跳转 -->
+    <div class="carousel-section" id="carouselSection" style="display: none;">
+        <div class="carousel-title">
+            <span></span>
+            <span>✨ 精选伙伴</span>
+        </div>
+        <div class="swiper-container" id="swiperContainer">
+            <div class="swiper-wrapper" id="carouselWrapper"></div>
+        </div>
+        <div class="dots" id="dotsContainer"></div>
+    </div>
+
+    <!-- 卡片列表容器 (无搜索框) -->
+    <div id="friendList" class="api-list">
+        <!-- 加载骨架屏 -->
+        <div class="loading-skeleton"><div class="skeleton-img"></div><div class="skeleton-text"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="loading-skeleton"><div class="skeleton-img"></div><div class="skeleton-text"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+        <div class="loading-skeleton"><div class="skeleton-img"></div><div class="skeleton-text"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+    </div>
+</main>
+
+<script>
+    (function() {
+        // DOM 元素
+        const friendContainer = document.getElementById('friendList');
+        const carouselSection = document.getElementById('carouselSection');
+        const carouselWrapper = document.getElementById('carouselWrapper');
+        const dotsContainer = document.getElementById('dotsContainer');
+        
+        let friendsData = [];         // 原始数据
+        let carouselItems = [];        // 轮播专用数据 (从原始数据取前6，无搜索过滤)
+        let currentIndex = 0;
+        let autoInterval = null;
+        
+        // ---------- 获取API数据 ----------
+        async function fetchFriends() {
+            try {
+                const apiUrl = './core/api.php?type=getFriend';
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
+                if (result.code === 200 && Array.isArray(result.data)) {
+                    friendsData = result.data.filter(item => item && typeof item === 'object' && item.title && item.url);
+                    // 数据增强: 为每个项目添加唯一id索引，以及图片后备
+                    friendsData.forEach((item, idx) => {
+                        item._id = idx;
+                        if (!item.image) item.image = ''; // 占位后续生成占位图
+                    });
+                    renderAll();
+                } else {
+                    throw new Error(result.msg || '数据格式异常');
+                }
+            } catch (error) {
+                console.error('获取友链失败:', error);
+                friendContainer.innerHTML = `<div class="empty-state">⚠️ 加载失败，请检查网络或api接口<br>尝试刷新页面</div>`;
+                carouselSection.style.display = 'none';
+            }
+        }
+        
+        // 渲染列表 & 更新轮播 (无搜索功能)
+        function renderAll() {
+            // 直接使用全部数据渲染卡片列表
+            renderCardList(friendsData);
+            // 渲染轮播 (前6条或者全部，最多6条展示轮播效果，无过滤)
+            updateCarousel(friendsData);
+        }
+        
+        // 卡片列表渲染 (点击卡片跳转url)
+        function renderCardList(data) {
+            if (!data.length) {
+                friendContainer.innerHTML = `<div class="empty-state">✨ 暂无友链数据，期待新朋友加入~</div>`;
+                return;
+            }
+            const html = data.map(friend => {
+                // 处理图片: 若有image则展示，若无则用优雅底色+首字
+                const imgHtml = friend.image && friend.image.trim() !== '' ? 
+                    `<img class="friend-image-thumb" src="${escapeHtml(friend.image)}" alt="${escapeHtml(friend.title)}" onerror="this.onerror=null;this.src='';this.style.background='#cbd5e1';">` :
+                    `<div class="friend-image-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#3b82f6,#6366f1);color:white;font-weight:bold;font-size:20px;">${escapeHtml(friend.title.charAt(0) || '友')}</div>`;
+                return `
+                    <div class="card" data-url="${escapeAttr(friend.url)}" data-title="${escapeAttr(friend.title)}">
+                        <div class="card-top">
+                            ${imgHtml}
+                            <div style="flex:1;">
+                                <div class="api-title">${escapeHtml(friend.title)}</div>
+                            </div>
+                        </div>
+                        <div class="api-desc">${escapeHtml(friend.desc || '暂无介绍，期待探索更多精彩~')}</div>
+                    </div>
+                `;
+            }).join('');
+            friendContainer.innerHTML = html;
+            // 绑定卡片点击跳转事件
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const url = card.getAttribute('data-url');
+                    if (url && url.trim()) {
+                        window.open(url, '_blank', 'noopener noreferrer');
+                    } else {
+                        alert('当前友链暂无有效网址');
+                    }
+                });
+            });
+        }
+        
+        // 轮播数据更新 (最多展示6个)
+        function updateCarousel(dataList) {
+            if (!dataList || dataList.length === 0) {
+                carouselSection.style.display = 'none';
+                if (autoInterval) clearInterval(autoInterval);
+                return;
+            }
+            // 取前最多6项做轮播（精选伙伴）
+            const maxCarousel = Math.min(dataList.length, 6);
+            carouselItems = dataList.slice(0, maxCarousel);
+            if (carouselItems.length === 0) {
+                carouselSection.style.display = 'none';
+                return;
+            }
+            carouselSection.style.display = 'block';
+            renderCarouselSlides();
+            // 重置当前索引
+            currentIndex = 0;
+            updateCarouselPosition();
+            generateDots();
+            startAutoPlay();
+        }
+        
+        // 生成轮播幻灯片HTML
+        function renderCarouselSlides() {
+            if (!carouselWrapper) return;
+            const slidesHtml = carouselItems.map(item => {
+                const imgSrc = item.image && item.image.trim() !== '' ? item.image : '';
+                // 优雅占位背景
+                const imageMarkup = imgSrc ? 
+                    `<img class="carousel-img" src="${escapeHtml(imgSrc)}" alt="${escapeHtml(item.title)}" onerror="this.src='';this.style.background='#334155';">` :
+                    `<div class="carousel-img" style="background: linear-gradient(120deg, #1e293b, #0f172a); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">✨</div>`;
+                return `
+                    <div class="swiper-slide">
+                        <div class="friend-carousel-card" data-url="${escapeAttr(item.url)}">
+                            ${imageMarkup}
+                            <div class="carousel-info">
+                                <h3>${escapeHtml(item.title)}</h3>
+                                <div class="carousel-desc">${escapeHtml(item.desc || '发现宝藏网站，点击立即探索')}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            carouselWrapper.innerHTML = slidesHtml;
+            // 绑定轮播卡片独立跳转 (点击精选卡片就能跳转)
+            document.querySelectorAll('.friend-carousel-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const url = card.getAttribute('data-url');
+                    if (url && url.trim()) {
+                        window.open(url, '_blank', 'noopener noreferrer');
+                    } else {
+                        alert('当前友链暂无有效网址');
+                    }
+                });
+            });
+        }
+        
+        function updateCarouselPosition() {
+            if (!carouselWrapper || carouselItems.length === 0) return;
+            // 获取父容器宽度（每个slide占满100%宽度）
+            const container = carouselWrapper.parentElement;
+            if (!container) return;
+            const slideWidth = container.clientWidth;
+            const offset = -currentIndex * slideWidth;
+            carouselWrapper.style.transform = `translateX(${offset}px)`;
+            carouselWrapper.style.transition = 'transform 0.35s ease-out';
+            // 更新dots激活样式
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, idx) => {
+                if (idx === currentIndex) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+        }
+        
+        function generateDots() {
+            if (!dotsContainer) return;
+            if (carouselItems.length <= 1) {
+                dotsContainer.innerHTML = '';
+                return;
+            }
+            let dotsHtml = '';
+            for (let i = 0; i < carouselItems.length; i++) {
+                dotsHtml += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
+            }
+            dotsContainer.innerHTML = dotsHtml;
+            // 绑定dot点击事件，点击dot切换轮播，增强交互但无按钮
+            document.querySelectorAll('.dot').forEach(dot => {
+                dot.addEventListener('click', (e) => {
+                    const idx = parseInt(dot.getAttribute('data-index'));
+                    if (!isNaN(idx) && idx !== currentIndex) {
+                        currentIndex = idx;
+                        updateCarouselPosition();
+                        resetAutoPlay();
+                    }
+                });
+            });
+        }
+        
+        // 自动轮播：每4秒切换到下一个 (无上一个下一个按钮，仅自动播放和圆点控制)
+        function goNext() {
+            if (carouselItems.length === 0) return;
+            currentIndex = (currentIndex + 1) % carouselItems.length;
+            updateCarouselPosition();
+            resetAutoPlay();
+        }
+        
+        function startAutoPlay() {
+            if (autoInterval) clearInterval(autoInterval);
+            if (carouselItems.length <= 1) return;
+            autoInterval = setInterval(() => {
+                goNext();
+            }, 4000);
+        }
+        
+        function resetAutoPlay() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                startAutoPlay();
+            }
+        }
+        
+        // 监听窗口resize重新校准轮播位置
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            if (carouselItems.length) {
+                if (resizeTimer) clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    updateCarouselPosition();
+                }, 100);
+            }
+        });
+        
+        // 防XSS工具函数
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
+        }
+        
+        function escapeAttr(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        }
+        
+        // 菜单下拉简单交互
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdown = document.getElementById('dropdown');
+        if (menuBtn && dropdown) {
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+            });
+            document.addEventListener('click', (e) => {
+                if (!dropdown.contains(e.target) && e.target !== menuBtn) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        }
+        
+        // 初始化所有数据
+        fetchFriends();
+    })();
+</script>
+</body>
+</html>

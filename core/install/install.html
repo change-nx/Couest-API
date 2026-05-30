@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Couest API 安装指引</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        :root{
+            --bg:#f5f7fb;
+            --card:#ffffff;
+            --text:#111827;
+            --sub:#6b7280;
+            --border:#e5e7eb;
+            --primary:#3b82f6;
+            --primary2:#6366f1;
+            --shadow:0 10px 35px rgba(0,0,0,.06);
+        }
+
+        body{
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left,rgba(59,130,246,.08),transparent 30%),
+                radial-gradient(circle at bottom right,rgba(99,102,241,.08),transparent 30%),
+                var(--bg);
+
+            font-family:
+                "PingFang SC",
+                "Microsoft YaHei",
+                sans-serif;
+
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:20px;
+            color:var(--text);
+        }
+
+        .container{
+            width:100%;
+            max-width:560px;
+        }
+
+        .card{
+            background:rgba(255,255,255,.92);
+            backdrop-filter:blur(12px);
+            border:1px solid rgba(255,255,255,.4);
+            border-radius:28px;
+            padding:34px;
+            box-shadow:var(--shadow);
+        }
+
+        .header{
+            text-align:center;
+            margin-bottom:30px;
+        }
+
+        .logo{
+            width:74px;
+            height:74px;
+            margin:0 auto 18px;
+            border-radius:22px;
+            background:linear-gradient(135deg,var(--primary),var(--primary2));
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 10px 25px rgba(59,130,246,.25);
+        }
+
+        .logo svg{
+            width:34px;
+            height:34px;
+            fill:#fff;
+        }
+
+        .title{
+            font-size:30px;
+            font-weight:700;
+            margin-bottom:10px;
+        }
+
+        .desc{
+            color:var(--sub);
+            font-size:14px;
+        }
+
+        .form-group{
+            margin-bottom:18px;
+        }
+
+        .label{
+            display:block;
+            margin-bottom:10px;
+            font-size:14px;
+            font-weight:600;
+        }
+
+        .input-wrap{
+            position:relative;
+        }
+
+        .input-wrap svg{
+            position:absolute;
+            left:16px;
+            top:50%;
+            transform:translateY(-50%);
+            width:18px;
+            height:18px;
+            fill:#9ca3af;
+        }
+
+        .input{
+            width:100%;
+            height:52px;
+            border-radius:16px;
+            border:1px solid var(--border);
+            background:#fff;
+            padding:0 16px 0 48px;
+            outline:none;
+            font-size:14px;
+            transition:.2s;
+        }
+
+        .input:focus{
+            border-color:var(--primary);
+            box-shadow:0 0 0 4px rgba(59,130,246,.12);
+        }
+
+        select.input{
+            appearance:none;
+        }
+
+        .submit-btn{
+            width:100%;
+            height:54px;
+            border:none;
+            border-radius:18px;
+            background:linear-gradient(135deg,var(--primary),var(--primary2));
+            color:#fff;
+            font-size:15px;
+            font-weight:600;
+            cursor:pointer;
+            transition:.2s;
+            margin-top:8px;
+            box-shadow:0 10px 20px rgba(59,130,246,.2);
+        }
+
+        .submit-btn:hover{
+            transform:translateY(-1px);
+            opacity:.96;
+        }
+
+        .submit-btn:active{
+            transform:scale(.985);
+        }
+
+        .footer{
+            margin-top:20px;
+            text-align:center;
+            color:var(--sub);
+            font-size:13px;
+        }
+
+        .toast{
+            position:fixed;
+            top:24px;
+            left:50%;
+            transform:translateX(-50%);
+            background:rgba(17,24,39,.94);
+            color:#fff;
+            padding:14px 18px;
+            border-radius:14px;
+            font-size:14px;
+            opacity:0;
+            pointer-events:none;
+            transition:.25s;
+            z-index:999;
+        }
+
+        .toast.show{
+            opacity:1;
+        }
+
+        .loading{
+            width:16px;
+            height:16px;
+            border:2px solid rgba(255,255,255,.4);
+            border-top-color:#fff;
+            border-radius:50%;
+            display:inline-block;
+            vertical-align:middle;
+            margin-right:8px;
+            animation:spin .7s linear infinite;
+        }
+
+        @keyframes spin{
+            to{
+                transform:rotate(360deg);
+            }
+        }
+
+        @media(max-width:640px){
+
+            .card{
+                padding:24px;
+                border-radius:24px;
+            }
+
+            .title{
+                font-size:24px;
+            }
+
+        }
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="container">
+    <div class="card">
+
+        <div class="header">
+
+            <div class="logo">
+                <svg viewBox="0 0 1024 1024">
+                    <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 128c176.7 0 320 143.3 320 320S688.7 832 512 832 192 688.7 192 512 335.3 192 512 192zm0 96c-17.7 0-32 14.3-32 32v160H352c-17.7 0-32 14.3-32 32s14.3 32 32 32h160c17.7 0 32-14.3 32-32V320c0-17.7-14.3-32-32-32z"/>
+                </svg>
+            </div>
+
+            <div class="title">Couest API 安装指引</div>
+
+            <div class="desc">
+                欢迎使用，请完成基础配置
+            </div>
+
+        </div>
+
+        <form id="installForm">
+
+            <div class="form-group">
+                <label class="label">网站标题</label>
+
+                <div class="input-wrap">
+
+                    <svg viewBox="0 0 1024 1024">
+                        <path d="M128 192h768v96H128zm0 256h768v96H128zm0 256h512v96H128z"/>
+                    </svg>
+
+                    <input
+                        type="text"
+                        class="input"
+                        name="title"
+                        placeholder="请输入网站标题"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="label">网站描述</label>
+
+                <div class="input-wrap">
+
+                    <svg viewBox="0 0 1024 1024">
+                        <path d="M192 128h640a64 64 0 0 1 64 64v640a64 64 0 0 1-64 64H192a64 64 0 0 1-64-64V192a64 64 0 0 1 64-64zm96 192v64h448v-64H288zm0 160v64h448v-64H288zm0 160v64h320v-64H288z"/>
+                    </svg>
+
+                    <input
+                        type="text"
+                        class="input"
+                        name="desc"
+                        placeholder="请输入网站描述"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="label">网站域名</label>
+
+                <div class="input-wrap">
+
+                    <svg viewBox="0 0 1024 1024">
+                        <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm256 448c0 42.3-8.2 82.6-23.1 119.5H624v128c-35.1 11.2-72.5 17.3-112 17.3s-76.9-6.1-112-17.3v-128H279.1C264.2 594.6 256 554.3 256 512s8.2-82.6 23.1-119.5H400V264c35.1-11.2 72.5-17.3 112-17.3s76.9 6.1 112 17.3v128h120.9C759.8 429.4 768 469.7 768 512z"/>
+                    </svg>
+
+                    <input
+                        type="text"
+                        class="input"
+                        name="domain"
+                        placeholder="https://example.com"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="label">网站图标（favicon）</label>
+
+                <div class="input-wrap">
+
+                    <svg viewBox="0 0 1024 1024">
+                        <path d="M128 192a64 64 0 0 1 64-64h640a64 64 0 0 1 64 64v640a64 64 0 0 1-64 64H192a64 64 0 0 1-64-64V192zm128 64v512h512V256H256zm96 96h320v320H352V352z"/>
+                    </svg>
+
+                    <input
+                        type="text"
+                        class="input"
+                        name="favicon"
+                        placeholder="请输入 favicon 图标地址"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="label">官方群链接</label>
+
+                <div class="input-wrap">
+
+                    <svg viewBox="0 0 1024 1024">
+                        <path d="M640 192h192v192h-64V301.3L512 557.3 466.7 512 722.7 256H640v-64zM256 320h256v64H320v384h384V576h64v256H256V320z"/>
+                    </svg>
+
+                    <input
+                        type="text"
+                        class="input"
+                        name="link"
+                        placeholder="请输入官方群链接"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="label">模板</label>
+
+                <div class="input-wrap">
+
+                    <svg viewBox="0 0 1024 1024">
+                        <path d="M128 192h352v288H128V192zm416 0h352v160H544V192zM128 544h224v288H128V544zm288 0h480v288H416V544z"/>
+                    </svg>
+
+                    <select class="input" name="template">
+                        <option value="default">default</option>
+                    </select>
+
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                立即安装
+            </button>
+
+        </form>
+
+        <div class="footer">
+            By 长歌
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+    const form = document.getElementById("installForm");
+    const toast = document.getElementById("toast");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function showToast(text){
+
+        toast.innerText = text;
+        toast.classList.add("show");
+
+        setTimeout(() => {
+            toast.classList.remove("show");
+        },2500);
+
+    }
+
+    form.addEventListener("submit", async (e)=>{
+
+        e.preventDefault();
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loading"></span>安装中...';
+
+        try{
+
+            const formData = new FormData(form);
+
+            const response = await fetch("",{
+                method:"POST",
+                body:formData
+            });
+
+            const result = await response.json();
+
+            if(result.code == 200){
+
+                showToast(result.msg || "安装成功");
+
+                setTimeout(()=>{
+                    location.reload();
+                },1200);
+
+            }else{
+
+                showToast(result.msg || "安装失败");
+
+            }
+
+        }catch(err){
+
+            showToast("请求失败");
+
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "立即安装";
+
+    });
+
+</script>
+
+</body>
+</html>

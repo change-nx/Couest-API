@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>站点配置 · 简洁控制台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f6f8fc;
+            font-family: 'Inter', system-ui, -apple-system, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', Roboto, sans-serif;
+            color: #0f172a;
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        :root {
+            --bg-page: #f6f8fc;
+            --card-bg: #ffffff;
+            --text-main: #0a0f1c;
+            --text-muted: #4b5569;
+            --text-placeholder: #94a3b8;
+            --border-light: #eef2f8;
+            --border-strong: #e2e8f0;
+            --accent: #2463eb;
+            --accent-hover: #1a4fbf;
+            --accent-soft: rgba(36, 99, 235, 0.08);
+            --danger: #e5484d;
+            --danger-soft: rgba(229, 72, 77, 0.06);
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 14px;
+            --radius-sm: 12px;
+            --transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-page: #0c111b;
+                --card-bg: #131a26;
+                --text-main: #edf2f7;
+                --text-muted: #9aa9bf;
+                --text-placeholder: #4f5b6b;
+                --border-light: #1f2a3a;
+                --border-strong: #2d3848;
+                --accent: #3b82f6;
+                --accent-hover: #5b9eff;
+                --accent-soft: rgba(59, 130, 246, 0.12);
+            }
+        }
+
+        body {
+            background: var(--bg-page);
+        }
+
+        /* 顶部导航 */
+        .app-bar {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 25;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo-area {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--accent);
+            letter-spacing: -0.3px;
+            background: var(--accent-soft);
+            padding: 6px 16px;
+            border-radius: 40px;
+        }
+        .dropdown {
+            position: relative;
+        }
+        .menu-trigger {
+            background: var(--card-bg);
+            border: 1px solid var(--border-strong);
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-xs);
+        }
+        .menu-trigger:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+        }
+        .dropdown-arrow {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+        .dropdown-panel {
+            position: absolute;
+            top: 46px;
+            left: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            min-width: 160px;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.15s;
+            z-index: 40;
+            overflow: hidden;
+        }
+        .dropdown-panel.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .dropdown-panel a {
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+        .dropdown-panel a:last-child {
+            border-bottom: none;
+        }
+        .dropdown-panel a:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+        .logout-button {
+            background: transparent;
+            border: 1px solid var(--border-strong);
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .logout-button:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: var(--danger-soft);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            max-width: 780px;
+            margin: 36px auto;
+            padding: 0 24px;
+        }
+
+        /* 卡片组件 */
+        .config-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-light);
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            box-shadow: var(--shadow-xs);
+            transition: var(--transition);
+        }
+        .config-card:hover {
+            box-shadow: var(--shadow-sm);
+        }
+        .card-header {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            border-bottom: 1.5px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+        }
+
+        .form-row {
+            margin-bottom: 22px;
+        }
+        .form-row label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+        .form-row input,
+        .form-row textarea,
+        .form-row select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-page);
+            border: 1.5px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            color: var(--text-main);
+            font-family: inherit;
+            transition: var(--transition);
+            outline: none;
+        }
+        .form-row input:focus,
+        .form-row textarea:focus,
+        .form-row select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        .form-row textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .btn-save {
+            margin-top: 12px;
+            padding: 12px 28px;
+            background: var(--accent);
+            border: none;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-xs);
+        }
+        .btn-save:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-secondary {
+            background: var(--card-bg);
+            border: 1px solid var(--border-strong);
+            color: var(--text-main);
+        }
+        .btn-secondary:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .toast-feedback {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937dd;
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 10px 26px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            z-index: 300;
+            font-weight: 500;
+            pointer-events: none;
+        }
+
+        @media (max-width: 640px) {
+            .main-content { padding: 0 16px; }
+            .config-card { padding: 20px; }
+            .two-columns { grid-template-columns: 1fr; gap: 16px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-bar">
+    <div class="nav-container">
+        <div class="logo-area">站点配置</div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <div class="dropdown">
+                <button class="menu-trigger" id="navDropdownBtn">
+                    后台菜单
+                    <span class="dropdown-arrow">⌵</span>
+                </button>
+                <div class="dropdown-panel" id="navDropdownPanel">
+                    <a href="index.php?action=admin&type=API">API管理</a>
+                    <a href="index.php?action=admin&type=friend">友链管理</a>
+                    <a href="index.php?action=admin&type=set">站点配置</a>
+                </div>
+            </div>
+            <button class="logout-button" id="logoutBtn">退出登录</button>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <!-- 配置信息卡片 - 所有字段共用一个保存按钮 -->
+    <div class="config-card">
+        <div class="card-header">
+            📄 配置信息
+        </div>
+        
+        <div class="form-row">
+            <label>网站标题</label>
+            <input type="text" id="siteTitle" placeholder="例如：API 导航站">
+        </div>
+
+        <div class="form-row">
+            <label>站点描述</label>
+            <textarea id="siteDesc" rows="2" placeholder="简洁优雅的 API 集合"></textarea>
+        </div>
+
+        <div class="two-columns">
+            <div class="form-row">
+                <label>站点域名</label>
+                <input type="text" id="siteDomain" placeholder="https://example.com">
+            </div>
+            <div class="form-row">
+                <label>Favicon 图标</label>
+                <input type="text" id="siteFavicon" placeholder="https://example.com/favicon.ico">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>官方群 / 底部链接</label>
+            <input type="text" id="siteLink" placeholder="https://qm.qq.com/...">
+        </div>
+
+        <div class="form-row">
+            <label>模板主题</label>
+            <select id="siteTemplate"></select>
+        </div>
+
+        <button class="btn-save" id="saveConfigBtn">💾 保存配置</button>
+    </div>
+
+    <!-- 管理员账户卡片 - 用户名和密码共用一个保存按钮 -->
+    <div class="config-card">
+        <div class="card-header">
+            🔐 管理员账户
+        </div>
+        <div class="two-columns">
+            <div class="form-row">
+                <label>新用户名</label>
+                <input type="text" id="adminUser" placeholder="输入新用户名">
+            </div>
+            <div class="form-row">
+                <label>新密码</label>
+                <input type="password" id="adminPass" placeholder="输入新密码">
+            </div>
+        </div>
+        <button class="btn-save" id="saveAdminBtn">👤 保存账密</button>
+        <div style="font-size: 0.7rem; color: var(--text-placeholder); margin-top: 12px;">
+            ⚡ 用户名和密码将同时更新
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- API 交互 ----------
+    async function callPostApi(payload) {
+        const formBody = new URLSearchParams();
+        for (const [key, val] of Object.entries(payload)) {
+            if (val !== undefined && val !== null) formBody.append(key, val);
+        }
+        const response = await fetch('./core/post.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formBody.toString()
+        });
+        return await response.json();
+    }
+
+    function showMessage(msg, isError = false) {
+        let existing = document.querySelector('.toast-feedback');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast-feedback';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2400);
+    }
+
+    // 加载配置并渲染表单
+    async function loadAllConfig() {
+        const res = await callPostApi({ type: 'getConfig' });
+        if (res.code === 200 && res.data) {
+            const data = res.data;
+            // 填充配置表单
+            document.getElementById('siteTitle').value = data.title || '';
+            document.getElementById('siteDesc').value = data.desc || '';
+            document.getElementById('siteDomain').value = data.domain || '';
+            document.getElementById('siteFavicon').value = data.favicon || '';
+            document.getElementById('siteLink').value = data.link || '';
+            
+            // 渲染下拉框主题
+            const templateList = data.template_list && data.template_list.length ? data.template_list : ['default'];
+            const templateSelect = document.getElementById('siteTemplate');
+            templateSelect.innerHTML = '';
+            templateList.forEach(tpl => {
+                const option = document.createElement('option');
+                option.value = tpl;
+                option.textContent = tpl;
+                if (tpl === (data.template || 'default')) option.selected = true;
+                templateSelect.appendChild(option);
+            });
+        } else {
+            showMessage('加载配置失败', true);
+        }
+    }
+
+    // 保存配置信息（所有字段一起提交）
+    async function saveAllConfig() {
+        const title = document.getElementById('siteTitle').value;
+        const desc = document.getElementById('siteDesc').value;
+        const domain = document.getElementById('siteDomain').value;
+        const favicon = document.getElementById('siteFavicon').value;
+        const link = document.getElementById('siteLink').value;
+        const template = document.getElementById('siteTemplate').value;
+
+        const res = await callPostApi({
+            type: 'setConfig',
+            title, desc, domain, favicon, link, template
+        });
+
+        if (res.code === 200) {
+            showMessage('配置保存成功 ✨');
+            await loadAllConfig();  // 重新拉取最新数据，保持一致性
+        } else {
+            showMessage(res.msg || '保存失败', true);
+        }
+    }
+
+    // 保存管理员账户（用户名和密码一起提交）
+    async function saveAdminAccount() {
+        const admin = document.getElementById('adminUser').value.trim();
+        const password = document.getElementById('adminPass').value;
+
+        if (!admin && !password) {
+            showMessage('请填写用户名或密码', true);
+            return;
+        }
+
+        // 如果只填了一个，也允许提交（后端会只更新填写的字段）
+        // 但为了用户体验，提示一下
+        if (!admin) {
+            showMessage('用户名不能为空', true);
+            return;
+        }
+        if (!password) {
+            showMessage('密码不能为空', true);
+            return;
+        }
+
+        const res = await callPostApi({ type: 'setAdmin', admin, password });
+
+        if (res.code === 200) {
+            showMessage('账密更新成功 ✨');
+            // 清空输入框
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
+        } else {
+            showMessage(res.msg || '更新失败', true);
+        }
+    }
+
+    // ---------- 退出 & 下拉菜单 ----------
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        await callPostApi({ type: 'clear' });
+        window.location.href = 'index.php?action=admin&type=login';
+    });
+
+    const dropBtn = document.getElementById('navDropdownBtn');
+    const dropPanel = document.getElementById('navDropdownPanel');
+    if (dropBtn && dropPanel) {
+        dropBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropPanel.classList.toggle('open');
+        });
+        document.addEventListener('click', (e) => {
+            if (!dropBtn.contains(e.target) && !dropPanel.contains(e.target)) {
+                dropPanel.classList.remove('open');
+            }
+        });
+    }
+
+    // 绑定保存按钮
+    document.getElementById('saveConfigBtn')?.addEventListener('click', saveAllConfig);
+    document.getElementById('saveAdminBtn')?.addEventListener('click', saveAdminAccount);
+
+    // 初始化
+    loadAllConfig();
+</script>
+</body>
+</html>
