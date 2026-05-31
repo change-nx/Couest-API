@@ -570,7 +570,7 @@
             }
             
             const url=buildUrl(api.url);
-            const exampleUrl = api.example || '';
+            const exampleUrl = buildUrl(api.example);
             
             docContent.innerHTML=`
                 <h2>${escapeHtml(api.title)}</h2>

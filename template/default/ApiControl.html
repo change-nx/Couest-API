@@ -595,19 +595,11 @@
         pageItems.forEach(item => {
             const safeId = escapeHtml(item.id || '');
             const safeTitle = escapeHtml(item.title || '未命名');
-            const safeDesc = escapeHtml(item.desc || '');
-            const safeUrl = escapeHtml(item.url || '');
-            const safeMethod = escapeHtml(item.method || 'GET');
             rows += `
                 <tr>
                     <td><span class="id-badge">${safeId}</span></td>
                     <td>
                         <strong>${safeTitle}</strong>
-                        ${safeDesc ? `<br><span style="font-size:0.7rem; color:var(--text-muted);">${safeDesc}</span>` : ''}
-                    </td>
-                    <td>
-                        <span class="api-url">${safeUrl}</span><br>
-                        <span style="font-size:0.65rem; color:var(--text-placeholder);">${safeMethod}</span>
                     </td>
                     <td style="width:130px">
                         <div class="action-group">
@@ -623,7 +615,7 @@
             <div class="data-card">
                 <table class="responsive-table">
                     <thead>
-                        <tr><th>ID</th><th>标题 / 描述</th><th>地址 / 方法</th><th>操作</th></tr>
+                        <tr><th>ID</th><th>标题</th><th>操作</th></tr>
                     </thead>
                     <tbody>
                         ${rows}
