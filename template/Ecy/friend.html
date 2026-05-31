@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>友情链接</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+        :root {
+            --bg-primary: #0a0e17;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-bg-hover: rgba(255, 255, 255, 0.06);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans SC', -apple-system, sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            line-height: 1.5; -webkit-font-smoothing: antialiased;
+            min-height: 100vh; position: relative;
+        }
+
+        .background-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; overflow: hidden;
+        }
+        .bg-image {
+            width: 100%; height: 100%; object-fit: cover;
+            opacity: .12; filter: blur(80px) saturate(1.5);
+            transform: scale(1.15);
+        }
+        .bg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, rgba(10,14,23,.7) 0%, rgba(10,14,23,.92) 100%);
+        }
+        .floating-orb {
+            position: absolute; border-radius: 50%;
+            filter: blur(100px); animation: float 25s ease-in-out infinite;
+        }
+        .orb-1 {
+            width: 700px; height: 700px;
+            background: var(--gradient-1);
+            top: -250px; right: -250px; opacity: .12;
+        }
+        .orb-2 {
+            width: 550px; height: 550px;
+            background: var(--gradient-2);
+            bottom: -200px; left: -200px; opacity: .09;
+            animation-delay: -10s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(40px, -40px) scale(1.05); }
+            66% { transform: translate(-30px, 30px) scale(.95); }
+        }
+
+        /* 导航 */
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(24px);
+            background: rgba(10,14,23,.75);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav {
+            max-width: 1280px; margin: auto;
+            padding: 18px 28px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo h1 {
+            font-size: 22px; font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #6366f1 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .menu-btn {
+            border: none; background: rgba(255,255,255,.05);
+            color: var(--text-primary); cursor: pointer;
+            font-size: 18px; padding: 10px 16px;
+            border-radius: 12px; backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            transition: all .25s ease;
+        }
+        .menu-btn:hover { background: rgba(255,255,255,.1); transform: translateY(-1px); }
+
+        .dropdown {
+            position: absolute; top: 72px; right: 28px;
+            width: 180px; background: rgba(17,24,39,.95);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 18px; overflow: hidden;
+            box-shadow: var(--shadow); display: none;
+            animation: slideDown .25s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px) scale(.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .dropdown.show { display: block; }
+        .dropdown a {
+            display: block; padding: 14px 18px;
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 14px; font-weight: 500;
+            transition: all .2s ease;
+            border-bottom: 1px solid rgba(255,255,255,.04);
+        }
+        .dropdown a:last-child { border-bottom: none; }
+        .dropdown a:hover {
+            background: rgba(99,102,241,.1);
+            color: var(--text-primary); padding-left: 22px;
+        }
+
+        /* 主容器 */
+        .container { max-width: 1280px; margin: auto; padding: 32px 28px; }
+
+        /* 轮播区块 */
+        .carousel-section {
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border-radius: 28px; margin-bottom: 32px;
+            padding: 24px; box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        .carousel-section:hover {
+            border-color: rgba(99,102,241,.25);
+            box-shadow: var(--shadow), 0 0 40px var(--accent-glow);
+        }
+        .carousel-title {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 1.25rem; font-weight: 700;
+            margin-bottom: 22px; padding-left: 6px;
+            color: var(--text-primary);
+        }
+        .carousel-title span:first-child {
+            background: var(--gradient-1);
+            width: 6px; height: 26px; border-radius: 7px; display: inline-block;
+        }
+        .swiper-container { overflow: hidden; border-radius: 24px; position: relative; }
+        .swiper-wrapper {
+            display: flex; transition-timing-function: cubic-bezier(.2,.9,.4,1.1);
+        }
+        .swiper-slide { flex-shrink: 0; width: 100%; }
+        .friend-carousel-card {
+            display: flex; flex-direction: column;
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border-radius: 24px; overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all .35s cubic-bezier(.34,1.56,.64,1);
+            cursor: pointer;
+        }
+        .friend-carousel-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(99,102,241,.25), 0 0 60px var(--accent-glow);
+            border-color: rgba(99,102,241,.3);
+        }
+        .carousel-img {
+            width: 100%; height: 170px; object-fit: cover;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            display: block;
+        }
+        .carousel-info { padding: 20px 18px 24px; }
+        .carousel-info h3 {
+            font-size: 1.4rem; font-weight: 800;
+            margin-bottom: 10px; color: var(--text-primary);
+            letter-spacing: -.3px;
+        }
+        .carousel-desc {
+            color: var(--text-secondary); font-size: .9rem;
+            line-height: 1.5; margin-bottom: 18px;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .carousel-link-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--accent); font-size: .86rem; font-weight: 600;
+        }
+
+        /* 圆点指示器 */
+        .dots { display: flex; justify-content: center; gap: 10px; margin-top: 18px; }
+        .dot {
+            width: 8px; height: 8px;
+            background: var(--border); border-radius: 10px;
+            transition: all .3s ease; cursor: pointer;
+        }
+        .dot.active { width: 26px; background: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+
+        /* 卡片列表 */
+        .api-list { display: flex; flex-direction: column; gap: 18px; }
+
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border-radius: 22px; padding: 22px;
+            box-shadow: var(--shadow); cursor: pointer;
+            transition: all .35s cubic-bezier(.34,1.56,.64,1);
+            border: 1px solid transparent;
+            display: flex; align-items: center; gap: 20px;
+        }
+        .card:hover {
+            background: var(--card-bg-hover);
+            border-color: rgba(99,102,241,.25);
+            transform: translateY(-3px) scale(1.005);
+            box-shadow: 0 16px 48px rgba(0,0,0,.45), 0 0 50px var(--accent-glow);
+        }
+        .card:active { transform: translateY(0) scale(.98); }
+
+        .friend-image-thumb {
+            width: 54px; height: 54px; border-radius: 16px;
+            object-fit: cover; flex-shrink: 0;
+            background: var(--accent-light);
+            border: 1px solid var(--border);
+        }
+
+        .api-title {
+            font-size: 19px; font-weight: 700;
+            line-height: 1.4; word-break: break-word;
+            flex: 1; letter-spacing: -.3px;
+        }
+        .api-desc {
+            margin-top: 6px; color: var(--text-secondary);
+            line-height: 1.6; font-size: .88rem;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center; padding: 70px 20px;
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border-radius: 28px; color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        /* 骨架屏 */
+        .loading-skeleton {
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border-radius: 22px; padding: 22px;
+            margin-bottom: 18px; display: flex; gap: 16px;
+            align-items: center; border: 1px solid var(--border);
+        }
+        .skeleton-img {
+            width: 54px; height: 54px;
+            background: var(--border); border-radius: 16px;
+            animation: pulse 1.2s infinite;
+        }
+        .skeleton-text { flex: 1; }
+        .skeleton-line {
+            height: 19px; background: var(--border);
+            border-radius: 13px; margin-bottom: 9px;
+            width: 78%; animation: pulse 1.2s infinite;
+        }
+        .skeleton-line.short { width: 58%; }
+        @keyframes pulse {
+            0% { opacity: .5; } 50% { opacity: 1; } 100% { opacity: .5; }
+        }
+
+        footer {
+            text-align: center; padding: 36px 20px;
+            color: var(--text-secondary); font-size: .82rem;
+            border-top: 1px solid var(--border); margin-top: 36px;
+        }
+
+        @media (max-width: 640px) {
+            .container { padding: 20px; }
+            .nav { padding: 14px 20px; }
+            .logo h1 { font-size: 18px; }
+            .card { padding: 18px; gap: 14px; }
+            .friend-image-thumb { width: 46px; height: 46px; }
+            .api-title { font-size: 17px; }
+            .carousel-info h3 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="background-layer">
+    <img src="bg.jpg" alt="" class="bg-image" onerror="this.style.display='none'">
+    <div class="bg-overlay"></div>
+    <div class="floating-orb orb-1"></div>
+    <div class="floating-orb orb-2"></div>
+</div>
+
+<header class="header">
+    <div class="nav">
+        <div class="logo"><h1>友情链接</h1></div>
+        <button class="menu-btn" id="menuBtn" aria-label="菜单">☰</button>
+        <div class="dropdown" id="dropdown">
+            <a href="./#">首页</a>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <!-- 轮播区块 -->
+    <div class="carousel-section" id="carouselSection" style="display:none;">
+        <div class="carousel-title">
+            <span></span>
+            <span>✨ 精选伙伴</span>
+        </div>
+        <div class="swiper-container" id="swiperContainer">
+            <div class="swiper-wrapper" id="carouselWrapper"></div>
+        </div>
+        <div class="dots" id="dotsContainer"></div>
+    </div>
+
+    <!-- 卡片列表 -->
+    <div id="friendList" class="api-list">
+        <!-- 骨架屏 -->
+        <div class="loading-skeleton">
+            <div class="skeleton-img"></div>
+            <div class="skeleton-text">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+        </div>
+        <div class="loading-skeleton">
+            <div class="skeleton-img"></div>
+            <div class="skeleton-text">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+        </div>
+        <div class="loading-skeleton">
+            <div class="skeleton-img"></div>
+            <div class="skeleton-text">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>© 2024 友情链接 · Powered by Ecy Theme</p>
+</footer>
+
+<script>
+    (function() {
+        const friendContainer = document.getElementById('friendList');
+        const carouselSection = document.getElementById('carouselSection');
+        const carouselWrapper = document.getElementById('carouselWrapper');
+        const dotsContainer = document.getElementById('dotsContainer');
+
+        let friendsData = [];
+        let carouselItems = [];
+        let currentIndex = 0;
+        let autoInterval = null;
+
+        async function fetchFriends() {
+            try {
+                const response = await fetch('./core/api.php?type=getFriend');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
+                if (result.code === 200 && Array.isArray(result.data)) {
+                    friendsData = result.data.filter(item => item && typeof item === 'object' && item.title && item.url);
+                    friendsData.forEach((item, idx) => {
+                        item._id = idx;
+                        if (!item.image) item.image = '';
+                    });
+                    renderAll();
+                } else {
+                    throw new Error(result.msg || '数据格式异常');
+                }
+            } catch (error) {
+                console.error('获取友链失败:', error);
+                friendContainer.innerHTML = `<div class="empty-state">⚠️ 加载失败，请检查网络或API接口<br><span style="font-size:.85rem;">尝试刷新页面</span></div>`;
+                carouselSection.style.display = 'none';
+            }
+        }
+
+        function renderAll() {
+            renderCardList(friendsData);
+            updateCarousel(friendsData);
+        }
+
+        function renderCardList(data) {
+            if (!data.length) {
+                friendContainer.innerHTML = `<div class="empty-state">✨ 暂无友链数据，期待新朋友加入~</div>`;
+                return;
+            }
+            
+            const html = data.map(friend => {
+                const imgHtml = friend.image && friend.image.trim() !== ''
+                    ? `<img class="friend-image-thumb" src="${escapeHtml(friend.image)}" alt="${escapeHtml(friend.title)}" onerror="this.onerror=null;this.src='';this.style.background='linear-gradient(135deg,#667eea,#764ba2)';">`
+                    : `<div class="friend-image-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#6366f1,#8b5cf6);color:white;font-weight:bold;font-size:22px;border-radius:16px;">${escapeHtml(friend.title.charAt(0) || '友')}</div>`;
+                
+                return `
+                    <div class="card" data-url="${escapeAttr(friend.url)}" data-title="${escapeAttr(friend.title)}">
+                        ${imgHtml}
+                        <div style="flex:1;">
+                            <div class="api-title">${escapeHtml(friend.title)}</div>
+                            <div class="api-desc">${escapeHtml(friend.desc || '暂无介绍，期待探索更多精彩~')}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            friendContainer.innerHTML = html;
+
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const url = card.getAttribute('data-url');
+                    if (url && url.trim()) {
+                        window.open(url, '_blank', 'noopener noreferrer');
+                    } else {
+                        alert('当前友链暂无有效网址');
+                    }
+                });
+            });
+        }
+
+        function updateCarousel(dataList) {
+            if (!dataList || dataList.length === 0) {
+                carouselSection.style.display = 'none';
+                if (autoInterval) clearInterval(autoInterval);
+                return;
+            }
+
+            const maxCarousel = Math.min(dataList.length, 6);
+            carouselItems = dataList.slice(0, maxCarousel);
+
+            if (carouselItems.length === 0) {
+                carouselSection.style.display = 'none';
+                return;
+            }
+
+            carouselSection.style.display = 'block';
+            renderCarouselSlides();
+            currentIndex = 0;
+            updateCarouselPosition();
+            generateDots();
+            startAutoPlay();
+        }
+
+        function renderCarouselSlides() {
+            if (!carouselWrapper) return;
+
+            const slidesHtml = carouselItems.map(item => {
+                const imgSrc = item.image && item.image.trim() !== '' ? item.image : '';
+                const imageMarkup = imgSrc
+                    ? `<img class="carousel-img" src="${escapeHtml(imgSrc)}" alt="${escapeHtml(item.title)}" onerror="this.src='';this.style.background='linear-gradient(120deg,#1e293b,#0f172a)';">`
+                    : `<div class="carousel-img" style="background: linear-gradient(120deg, #1e293b, #0f172a); display: flex; align-items: center; justify-content: center; color: white; font-size: 2.5rem;">✨</div>`;
+                
+                return `
+                    <div class="swiper-slide">
+                        <div class="friend-carousel-card" data-url="${escapeAttr(item.url)}">
+                            ${imageMarkup}
+                            <div class="carousel-info">
+                                <h3>${escapeHtml(item.title)}</h3>
+                                <div class="carousel-desc">${escapeHtml(item.desc || '发现宝藏网站，点击立即探索')}</div>
+                                <div class="carousel-link-badge">🔗 访问站点 →</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            carouselWrapper.innerHTML = slidesHtml;
+
+            document.querySelectorAll('.friend-carousel-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const url = card.getAttribute('data-url');
+                    if (url && url.trim()) {
+                        window.open(url, '_blank', 'noopener noreferrer');
+                    } else {
+                        alert('当前友链暂无有效网址');
+                    }
+                });
+            });
+        }
+
+        function updateCarouselPosition() {
+            if (!carouselWrapper || carouselItems.length === 0) return;
+
+            const container = carouselWrapper.parentElement;
+            if (!container) return;
+
+            const slideWidth = container.clientWidth;
+            const offset = -currentIndex * slideWidth;
+            carouselWrapper.style.transform = `translateX(${offset}px)`;
+            carouselWrapper.style.transition = 'transform .35s ease-out';
+
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, idx) => {
+                if (idx === currentIndex) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+        }
+
+        function generateDots() {
+            if (!dotsContainer) return;
+            if (carouselItems.length <= 1) {
+                dotsContainer.innerHTML = '';
+                return;
+            }
+
+            let dotsHtml = '';
+            for (let i = 0; i < carouselItems.length; i++) {
+                dotsHtml += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
+            }
+            dotsContainer.innerHTML = dotsHtml;
+
+            document.querySelectorAll('.dot').forEach(dot => {
+                dot.addEventListener('click', (e) => {
+                    const idx = parseInt(dot.getAttribute('data-index'));
+                    if (!isNaN(idx) && idx !== currentIndex) {
+                        currentIndex = idx;
+                        updateCarouselPosition();
+                        resetAutoPlay();
+                    }
+                });
+            });
+        }
+
+        function goNext() {
+            if (carouselItems.length === 0) return;
+            currentIndex = (currentIndex + 1) % carouselItems.length;
+            updateCarouselPosition();
+            resetAutoPlay();
+        }
+
+        function startAutoPlay() {
+            if (autoInterval) clearInterval(autoInterval);
+            if (carouselItems.length <= 1) return;
+            autoInterval = setInterval(goNext, 4200);
+        }
+
+        function resetAutoPlay() {
+            if (autoInterval) { clearInterval(autoInterval); startAutoPlay(); }
+        }
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            if (carouselItems.length) {
+                if (resizeTimer) clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => updateCarouselPosition(), 100);
+            }
+        });
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) { return c; });
+        }
+
+        function escapeAttr(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        }
+
+        // 菜单交互
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdown = document.getElementById('dropdown');
+        if (menuBtn && dropdown) {
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+            });
+            document.addEventListener('click', (e) => {
+                if (!dropdown.contains(e.target) && e.target !== menuBtn) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        }
+
+        fetchFriends();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台登录</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-bg-hover: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans SC', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 背景层 */
+        .background-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.12;
+            filter: blur(80px) saturate(1.6);
+            transform: scale(1.15);
+        }
+
+        .bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, var(--bg-primary) 90%);
+        }
+
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            animation: float 25s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 800px;
+            height: 800px;
+            background: var(--gradient-1);
+            top: -300px;
+            right: -300px;
+            opacity: 0.18;
+        }
+
+        .orb-2 {
+            width: 600px;
+            height: 600px;
+            background: var(--gradient-2);
+            bottom: -200px;
+            left: -200px;
+            opacity: 0.14;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(40px, -40px) scale(1.05); }
+            66% { transform: translate(-30px, 30px) scale(0.95); }
+        }
+
+        /* 登录卡片 */
+        .login-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(30px);
+            padding: 52px 46px;
+            width: 460px;
+            max-width: 92vw;
+            border-radius: 32px;
+            box-shadow: var(--shadow), 0 0 80px var(--accent-glow);
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            z-index: 10;
+            animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .login-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 56px rgba(0, 0, 0, 0.5), 0 0 100px var(--accent-glow);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 22px;
+            background: var(--gradient-1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .login-card h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #fff 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-sub {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 9px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px 18px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+            backdrop-filter: blur(10px);
+        }
+
+        .input-field:focus {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.06);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 0 20px var(--accent-glow);
+        }
+
+        .input-field::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px 20px;
+            background: var(--gradient-1);
+            border: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin-top: 14px;
+            font-family: inherit;
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 36px rgba(99, 102, 241, 0.45);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(17, 24, 39, 0.96);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 13px 28px;
+            border-radius: 40px;
+            font-size: 0.88rem;
+            z-index: 1000;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* 响应式 */
+        @media (max-width: 520px) {
+            .login-card { padding: 40px 32px; }
+            .login-card h2 { font-size: 1.7rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 背景层 -->
+    <div class="background-layer">
+        <img src="bg.jpg" alt="" class="bg-image" onerror="this.style.display='none'">
+        <div class="bg-overlay"></div>
+        <div class="floating-orb orb-1"></div>
+        <div class="floating-orb orb-2"></div>
+    </div>
+
+    <!-- 登录卡片 -->
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">🔐</div>
+            <h2>欢迎回来</h2>
+            <p class="login-sub">请输入您的管理员账号</p>
+        </div>
+        
+        <div class="input-group">
+            <label class="input-label">账号</label>
+            <input type="text" id="adminName" class="input-field" placeholder="请输入账号" autocomplete="off">
+        </div>
+        
+        <div class="input-group">
+            <label class="input-label">密码</label>
+            <input type="password" id="adminPwd" class="input-field" placeholder="请输入密码">
+        </div>
+        
+        <button id="loginBtn" class="login-btn">登 录</button>
+    </div>
+
+    <script>
+        function showToast(msg) {
+            let toast = document.querySelector('.toast');
+            if (toast) toast.remove();
+            const div = document.createElement('div');
+            div.className = 'toast';
+            div.innerText = msg;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 2500);
+        }
+
+        document.getElementById('loginBtn').onclick = async () => {
+            const admin = document.getElementById('adminName').value.trim();
+            const password = document.getElementById('adminPwd').value;
+            if (!admin || !password) {
+                showToast('⚠️ 请输入账号和密码');
+                return;
+            }
+            
+            const formData = new URLSearchParams();
+            formData.append('type', 'login');
+            formData.append('admin', admin);
+            formData.append('password', password);
+            
+            try {
+                const res = await fetch('./core/post.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+                const data = await res.json();
+                if (data.code === 200) {
+                    window.location.href = 'index.php?action=admin&type=API';
+                } else {
+                    showToast(data.msg || '❌ 登录失败');
+                }
+            } catch (e) {
+                showToast('🌐 网络错误，请稍后重试');
+            }
+        };
+
+        document.getElementById('adminPwd').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+    </script>
+</body>
+</html>

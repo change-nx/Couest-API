@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>友链管理</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-bg-hover: rgba(255, 255, 255, 0.06);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --accent-light: rgba(99, 102, 241, 0.1);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans SC', -apple-system, sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            line-height: 1.5; -webkit-font-smoothing: antialiased;
+            min-height: 100vh; position: relative;
+        }
+
+        .background-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; overflow: hidden;
+        }
+        .bg-image {
+            width: 100%; height: 100%; object-fit: cover;
+            opacity: .08; filter: blur(80px) saturate(1.6);
+            transform: scale(1.15);
+        }
+        .bg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, rgba(10,14,23,.85) 0%, rgba(10,14,23,.95) 100%);
+        }
+
+        /* 导航 */
+        .app-bar {
+            background: rgba(10,14,23,.75); backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 30;
+        }
+        .nav-container {
+            max-width: 1400px; margin: 0 auto;
+            padding: 16px 28px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo-area {
+            font-weight: 700; font-size: 1rem;
+            color: var(--accent); letter-spacing: -.3px;
+            background: var(--accent-light);
+            padding: 8px 20px; border-radius: 40px;
+            border: 1px solid rgba(99,102,241,.25);
+        }
+        .dropdown { position: relative; }
+        .menu-trigger {
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            padding: 9px 20px; border-radius: 40px;
+            font-size: .85rem; font-weight: 600;
+            color: var(--text-primary); cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            transition: all .25s ease;
+        }
+        .menu-trigger:hover {
+            background: var(--card-bg-hover);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .dropdown-arrow { font-size: 11px; opacity: .7; }
+        .dropdown-panel {
+            position: absolute; top: 50px; left: 0;
+            background: rgba(17,24,39,.97); backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-radius: 18px; box-shadow: var(--shadow);
+            min-width: 180px;
+            opacity: 0; visibility: hidden;
+            transition: all .2s ease; z-index: 40; overflow: hidden;
+        }
+        .dropdown-panel.open { opacity: 1; visibility: visible; animation: slideDown .25s cubic-bezier(.34,1.56,.64,1); }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px) scale(.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .dropdown-panel a {
+            display: block; padding: 13px 22px;
+            text-decoration: none; font-size: .85rem; font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255,255,255,.04);
+            transition: all .2s ease;
+        }
+        .dropdown-panel a:last-child { border-bottom: none; }
+        .dropdown-panel a:hover { background: var(--accent-light); color: var(--text-primary); padding-left: 26px; }
+        .logout-button {
+            background: transparent; border: 1px solid var(--border);
+            padding: 9px 20px; border-radius: 40px;
+            font-size: .82rem; font-weight: 600;
+            color: var(--text-muted); cursor: pointer;
+            transition: all .25s ease;
+        }
+        .logout-button:hover {
+            border-color: var(--danger); color: var(--danger);
+            background: rgba(239,68,68,.1);
+            box-shadow: 0 0 16px var(--danger-glow);
+        }
+
+        /* 主内容 */
+        .main-content { max-width: 1400px; margin: 36px auto; padding: 0 28px; }
+
+        /* 表格卡片 */
+        .data-card {
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border-radius: 26px; border: 1px solid var(--border);
+            overflow: hidden; box-shadow: var(--shadow);
+            transition: all .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        .data-card:hover {
+            border-color: rgba(99,102,241,.25);
+            box-shadow: var(--shadow), 0 0 40px var(--accent-glow);
+        }
+        .friend-table { width: 100%; border-collapse: collapse; }
+        .friend-table th {
+            text-align: left; padding: 17px 22px;
+            background: rgba(99,102,241,.08);
+            font-size: .78rem; font-weight: 700;
+            color: var(--accent); letter-spacing: .8px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+        .friend-table td {
+            padding: 19px 22px; font-size: .87rem;
+            border-bottom: 1px solid rgba(255,255,255,.04);
+            color: var(--text-primary); vertical-align: middle;
+        }
+        .friend-table tr:last-child td { border-bottom: none; }
+        .friend-table tbody tr { transition: all .2s ease; }
+        .friend-table tbody tr:hover td { background: var(--card-bg-hover); }
+
+        .friend-avatar {
+            width: 46px; height: 46px; border-radius: 14px;
+            object-fit: cover; background: rgba(99,102,241,.08);
+            border: 1px solid var(--border);
+        }
+        .friend-name { font-weight: 600; font-size: .92rem; }
+        .friend-url {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: .75rem; color: var(--accent);
+            word-break: break-all; max-width: 300px; display: inline-block;
+        }
+        .friend-desc {
+            font-size: .81rem; color: var(--text-muted);
+            max-width: 270px; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+        .action-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .action-chip {
+            background: var(--card-bg); backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            padding: 7px 16px; border-radius: 32px;
+            font-size: .73rem; font-weight: 600;
+            cursor: pointer; transition: all .25s cubic-bezier(.34,1.56,.64,1);
+            color: var(--text-muted);
+        }
+        .action-chip.delete:hover {
+            background: rgba(239,68,68,.1);
+            border-color: var(--danger); color: var(--danger);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px var(--danger-glow);
+        }
+
+        .empty-state { text-align: center; padding: 80px 20px; color: var(--text-muted); font-size: .92rem; }
+        .empty-state-icon { font-size: 56px; margin-bottom: 18px; animation: float 4s ease-in-out infinite; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        /* 分页 */
+        .pagination-bar {
+            display: flex; justify-content: flex-end;
+            gap: 10px; margin-top: 28px; align-items: center;
+        }
+        .page-item {
+            background: var(--card-bg); backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            padding: 9px 17px; border-radius: 40px;
+            font-size: .76rem; font-weight: 600;
+            cursor: pointer; transition: all .25s ease;
+            color: var(--text-muted);
+        }
+        .page-item.active {
+            background: var(--gradient-1); border-color: transparent;
+            color: white; box-shadow: 0 4px 16px var(--accent-glow);
+        }
+        .page-item.disabled { opacity: .35; pointer-events: none; }
+        .page-item:not(.disabled):not(.active):hover {
+            background: var(--card-bg-hover);
+            border-color: var(--accent); color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        /* FAB */
+        .fab-add {
+            position: fixed; bottom: 36px; right: 36px;
+            width: 60px; height: 60px;
+            background: var(--gradient-1); border: none;
+            border-radius: 30px; color: white;
+            font-size: 28px; font-weight: 300;
+            cursor: pointer; box-shadow: 0 8px 32px var(--accent-glow);
+            transition: all .35s cubic-bezier(.34,1.56,.64,1);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 45;
+        }
+        .fab-add:hover { transform: scale(1.08) rotate(90deg); box-shadow: 0 12px 40px rgba(99,102,241,.55); }
+
+        /* 模态框 */
+        .modal-mask {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.7); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 200; opacity: 0; visibility: hidden;
+            transition: all .25s ease;
+        }
+        .modal-mask.active { opacity: 1; visibility: visible; }
+        .modal-container {
+            background: rgba(17,24,39,.98); backdrop-filter: blur(30px);
+            width: 560px; max-width: 94vw;
+            border-radius: 28px; border: 1px solid var(--border);
+            box-shadow: 0 24px 64px rgba(0,0,0,.6), 0 0 80px var(--accent-glow);
+            overflow: hidden;
+            animation: scaleIn .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(.92) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-header {
+            padding: 24px 28px; border-bottom: 1px solid var(--border);
+            font-weight: 800; font-size: 1.12rem;
+            letter-spacing: -.3px;
+            background: linear-gradient(135deg, rgba(99,102,241,.05) 0%, transparent 100%);
+        }
+        .modal-body { padding: 26px 28px; }
+        .field-group { margin-bottom: 22px; }
+        .field-group label {
+            display: block; font-size: .82rem; font-weight: 700;
+            margin-bottom: 9px; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: .7px;
+        }
+        .field-group input,
+        .field-group textarea {
+            width: 100%; padding: 14px 18px;
+            background: rgba(0,0,0,.3);
+            border: 1.5px solid var(--border);
+            border-radius: 14px; font-size: .87rem;
+            color: var(--text-primary); font-family: inherit;
+            transition: all .25s ease; outline: none;
+            backdrop-filter: blur(10px);
+        }
+        .field-group input:focus,
+        .field-group textarea:focus {
+            border-color: var(--accent);
+            background: rgba(99,102,241,.06);
+            box-shadow: 0 0 0 4px rgba(99,102,241,.15);
+        }
+        .modal-footer {
+            padding: 20px 28px; border-top: 1px solid var(--border);
+            display: flex; justify-content: flex-end; gap: 12px;
+            background: rgba(0,0,0,.15);
+        }
+        .btn-modal {
+            padding: 11px 26px; border-radius: 40px;
+            font-size: .82rem; font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--card-bg); backdrop-filter: blur(10px);
+            cursor: pointer; transition: all .25s ease;
+            color: var(--text-secondary);
+        }
+        .btn-modal:hover { background: var(--card-bg-hover); border-color: var(--text-muted); color: var(--text-primary); }
+        .btn-primary-modal {
+            background: var(--gradient-1); border-color: transparent;
+            color: white; box-shadow: 0 4px 16px var(--accent-glow);
+        }
+        .btn-primary-modal:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(99,102,241,.5); }
+
+        .toast-feedback {
+            position: fixed; bottom: 110px; left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(17,24,39,.97); backdrop-filter: blur(20px);
+            color: white; padding: 12px 30px; border-radius: 40px;
+            font-size: .84rem; z-index: 300; font-weight: 600;
+            pointer-events: none; border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0,0,0,.4);
+            animation: toastIn .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container { padding: 12px 20px; }
+            .main-content { padding: 0 20px; margin-top: 24px; }
+            .friend-table th, .friend-table td { padding: 14px 16px; }
+            .friend-url { max-width: 170px; font-size: .7rem; }
+            .fab-add { bottom: 24px; right: 24px; width: 54px; height: 54px; font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="background-layer">
+    <img src="bg.jpg" alt="" class="bg-image" onerror="this.style.display='none'">
+    <div class="bg-overlay"></div>
+</div>
+
+<div class="app-bar">
+    <div class="nav-container">
+        <div class="logo-area">🔗 友链管理</div>
+        <div style="display:flex; gap:14px; align-items:center;">
+            <div class="dropdown">
+                <button class="menu-trigger" id="navDropdownBtn">
+                    后台菜单
+                    <span class="dropdown-arrow">⌵</span>
+                </button>
+                <div class="dropdown-panel" id="navDropdownPanel">
+                    <a href="index.php?action=admin&type=API">API管理</a>
+                    <a href="index.php?action=admin&type=friend">友链管理</a>
+                    <a href="index.php?action=admin&type=set">站点配置</a>
+                </div>
+            </div>
+            <button class="logout-button" id="logoutBtn">退出登录</button>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div id="tableWrapper">加载中...</div>
+    <div id="paginationWrapper"></div>
+</div>
+
+<button class="fab-add" id="createFab">+</button>
+
+<script>
+    let friendList = [];
+    let currentPage = 1;
+    const pageSize = 10;
+
+    async function callPostApi(payload) {
+        const formBody = new URLSearchParams();
+        for (const [key, val] of Object.entries(payload)) {
+            if (val !== undefined && val !== null) formBody.append(key, val);
+        }
+        const response = await fetch('./core/post.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formBody.toString()
+        });
+        return await response.json();
+    }
+
+    function showMessage(msg, isError = false) {
+        let existing = document.querySelector('.toast-feedback');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast-feedback';
+        toast.innerText = (isError ? '❌ ' : '✅ ') + msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2200);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function renderFriendTable(items, page, pageSizeVal) {
+        const start = (page - 1) * pageSizeVal;
+        const pageItems = items.slice(start, start + pageSizeVal);
+        const isEmpty = items.length === 0;
+
+        if (isEmpty) {
+            return `
+                <div class="data-card">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🌱</div>
+                        暂无友情链接<br>
+                        <span style="font-size:.82rem; opacity:.7;">点击右下角「+」添加伙伴站点</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        let rows = '';
+        pageItems.forEach((item) => {
+            const safeTitle = escapeHtml(item.title || '未命名');
+            const safeDesc = escapeHtml(item.desc || '');
+            const safeUrl = escapeHtml(item.url || '#');
+            const safeImage = escapeHtml(item.image || '');
+            
+            const imageHtml = safeImage 
+                ? `<img src="${safeImage}" class="friend-avatar" alt="icon" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2246%22%20height%3D%2246%22%20viewBox%3D%220%200%2046%2046%22%3E%3Crect%20width%3D%2246%22%20height%3D%2246%22%20fill%3D%22rgba(99%2C102%2C241%2C.1)%22%20rx%3D%2214%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%236366f1%22%20font-size%3D%2220%22%3E🔗%3C%2Ftext%3E%3C%2Fsvg%3E'">` 
+                : `<div class="friend-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--accent-light);color:var(--accent);font-size:20px;">🌐</div>`;
+            
+            rows += `
+                <tr>
+                    <td style="width:72px">${imageHtml}</td>
+                    <td><div class="friend-name">${safeTitle}</div></td>
+                    <td><span class="friend-url">${safeUrl}</span></td>
+                    <td><div class="friend-desc" title="${safeDesc}">${safeDesc}</div></td>
+                    <td style="width:84px">
+                        <div class="action-group">
+                            <button class="action-chip delete" data-title="${safeTitle}">删除</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        return `
+            <div class="data-card">
+                <table class="friend-table">
+                    <thead><tr><th style="width:72px">图标</th><th>站点名称</th><th>链接地址</th><th>描述</th><th style="width:84px">操作</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    function renderPaginationControls(totalItems, current, pageSizeVal) {
+        const totalPages = Math.ceil(totalItems / pageSizeVal);
+        if (totalPages <= 1) return '';
+        
+        let html = `<div class="pagination-bar">`;
+        html += `<button class="page-item ${current === 1 ? 'disabled' : ''}" id="prevPageBtn">← 上一页</button>`;
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="page-item ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
+        }
+        html += `<button class="page-item ${current === totalPages ? 'disabled' : ''}" id="nextPageBtn">下一页 →</button>`;
+        html += `</div>`;
+        return html;
+    }
+
+    function refreshUI() {
+        document.getElementById('tableWrapper').innerHTML = renderFriendTable(friendList, currentPage, pageSize);
+        document.getElementById('paginationWrapper').innerHTML = renderPaginationControls(friendList.length, currentPage, pageSize);
+        bindDeleteEvents();
+        bindPaginationEvents();
+    }
+
+    async function loadFriendData() {
+        const res = await callPostApi({ type: 'getFriend' });
+        if (res.code === 200) {
+            friendList = res.data || [];
+            const maxPage = Math.ceil(friendList.length / pageSize) || 1;
+            if (currentPage > maxPage) currentPage = maxPage;
+            refreshUI();
+        } else {
+            document.getElementById('tableWrapper').innerHTML = `<div class="data-card"><div class="empty-state"><div class="empty-state-icon">❌</div>加载失败: ${res.msg || '请检查后端'}</div></div>`;
+            document.getElementById('paginationWrapper').innerHTML = '';
+        }
+    }
+
+    function bindDeleteEvents() {
+        document.querySelectorAll('.action-chip.delete').forEach(btn => {
+            btn.removeEventListener('click', handleDelete);
+            btn.addEventListener('click', handleDelete);
+        });
+    }
+
+    async function handleDelete(e) {
+        const btn = e.currentTarget;
+        const title = btn.getAttribute('data-title');
+        if (!title) return;
+        if (!confirm(`确定要删除友链「${title}」吗？`)) return;
+        
+        const res = await callPostApi({ type: 'delFriend', title: title });
+        if (res.code === 200) {
+            showMessage('删除成功');
+            await loadFriendData();
+        } else {
+            showMessage(res.msg || '删除失败', true);
+        }
+    }
+
+    function bindPaginationEvents() {
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+        const totalPages = Math.ceil(friendList.length / pageSize);
+
+        if (prevBtn) prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; refreshUI(); } };
+        if (nextBtn) nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; refreshUI(); } };
+        
+        document.querySelectorAll('.page-item[data-page]').forEach(btn => {
+            btn.onclick = () => {
+                const page = parseInt(btn.getAttribute('data-page'));
+                if (!isNaN(page) && page !== currentPage) { currentPage = page; refreshUI(); }
+            };
+        });
+    }
+
+    function openAddModal() {
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal-mask';
+        modalDiv.innerHTML = `
+            <div class="modal-container">
+                <div class="modal-header">➕ 添加友链</div>
+                <div class="modal-body">
+                    <div class="field-group"><label>站点名称 *</label><input id="friendTitle" placeholder="例如：小明博客"></div>
+                    <div class="field-group"><label>描述 *</label><textarea id="friendDesc" rows="2" placeholder="简短介绍..."></textarea></div>
+                    <div class="field-group"><label>图标地址 (URL)</label><input id="friendImage" placeholder="https://example.com/icon.png"></div>
+                    <div class="field-group"><label>链接 *</label><input id="friendUrl" placeholder="https://"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal" id="cancelModalBtn">取消</button>
+                    <button class="btn-modal btn-primary-modal" id="confirmModalBtn">创建</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modalDiv);
+        setTimeout(() => modalDiv.classList.add('active'), 10);
+
+        const closeModal = () => modalDiv.remove();
+        document.getElementById('cancelModalBtn').onclick = closeModal;
+
+        document.getElementById('confirmModalBtn').onclick = async () => {
+            const title = document.getElementById('friendTitle').value.trim();
+            const desc = document.getElementById('friendDesc').value.trim();
+            const image = document.getElementById('friendImage').value.trim();
+            const url = document.getElementById('friendUrl').value.trim();
+
+            if (!title || !desc || !url) {
+                showMessage('请完整填写必填项', true);
+                return;
+            }
+
+            const res = await callPostApi({
+                type: 'addFriend',
+                title, desc, image, url
+            });
+
+            if (res.code === 200) {
+                showMessage('添加成功');
+                closeModal();
+                currentPage = 1;
+                await loadFriendData();
+            } else {
+                showMessage(res.msg || '操作失败', true);
+            }
+        };
+    }
+
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        await callPostApi({ type: 'clear' });
+        window.location.href = 'index.php?action=admin&type=login';
+    });
+
+    const dropBtn = document.getElementById('navDropdownBtn');
+    const dropPanel = document.getElementById('navDropdownPanel');
+    if (dropBtn && dropPanel) {
+        dropBtn.addEventListener('click', (e) => { e.stopPropagation(); dropPanel.classList.toggle('open'); });
+        document.addEventListener('click', (e) => {
+            if (!dropBtn.contains(e.target) && !dropPanel.contains(e.target)) dropPanel.classList.remove('open');
+        });
+    }
+
+    document.getElementById('createFab')?.addEventListener('click', openAddModal);
+
+    loadFriendData();
+</script>
+</body>
+</html>

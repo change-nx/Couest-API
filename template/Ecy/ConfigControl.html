@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>站点配置 · 控制台</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-bg-hover: rgba(255, 255, 255, 0.06);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --accent-light: rgba(99, 102, 241, 0.1);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans SC', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .background-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; overflow: hidden;
+        }
+        .bg-image {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.08;
+            filter: blur(80px) saturate(1.6);
+            transform: scale(1.15);
+        }
+        .bg-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, rgba(10,14,23,.85) 0%, rgba(10,14,23,.95) 100%);
+        }
+
+        /* 导航 */
+        .app-bar {
+            background: rgba(10,14,23,.75);
+            backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0; z-index: 30;
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo-area {
+            font-weight: 700; font-size: 1rem;
+            color: var(--accent); letter-spacing: -.3px;
+            background: var(--accent-light);
+            padding: 8px 20px; border-radius: 40px;
+            border: 1px solid rgba(99,102,241,.25);
+        }
+        .dropdown { position: relative; }
+        .menu-trigger {
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            padding: 9px 20px; border-radius: 40px;
+            font-size: .85rem; font-weight: 600;
+            color: var(--text-primary); cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            transition: all .25s ease;
+        }
+        .menu-trigger:hover {
+            background: var(--card-bg-hover);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .dropdown-arrow { font-size: 11px; opacity: .7; }
+        .dropdown-panel {
+            position: absolute; top: 50px; left: 0;
+            background: rgba(17,24,39,.97); backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            min-width: 180px;
+            opacity: 0; visibility: hidden;
+            transition: all .2s ease; z-index: 40; overflow: hidden;
+        }
+        .dropdown-panel.open { opacity: 1; visibility: visible; animation: slideDown .25s cubic-bezier(.34,1.56,.64,1); }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px) scale(.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .dropdown-panel a {
+            display: block; padding: 13px 22px;
+            text-decoration: none; font-size: .85rem; font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255,255,255,.04);
+            transition: all .2s ease;
+        }
+        .dropdown-panel a:last-child { border-bottom: none; }
+        .dropdown-panel a:hover { background: var(--accent-light); color: var(--text-primary); padding-left: 26px; }
+        .logout-button {
+            background: transparent; border: 1px solid var(--border);
+            padding: 9px 20px; border-radius: 40px;
+            font-size: .82rem; font-weight: 600;
+            color: var(--text-muted); cursor: pointer;
+            transition: all .25s ease;
+        }
+        .logout-button:hover {
+            border-color: var(--danger); color: var(--danger);
+            background: rgba(239,68,68,.1);
+            box-shadow: 0 0 16px var(--danger-glow);
+        }
+
+        /* 主内容 */
+        .main-content { max-width: 820px; margin: 36px auto; padding: 0 28px; }
+
+        .config-card {
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border-radius: 26px;
+            border: 1px solid var(--border);
+            padding: 32px; margin-bottom: 28px;
+            box-shadow: var(--shadow);
+            transition: all .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        .config-card:hover {
+            border-color: rgba(99,102,241,.25);
+            box-shadow: var(--shadow), 0 0 40px var(--accent-glow);
+        }
+        .card-header {
+            font-size: 1.05rem; font-weight: 800;
+            margin-bottom: 26px; padding-bottom: 16px;
+            border-bottom: 1.5px solid var(--border);
+            display: flex; align-items: center; gap: 10px;
+            color: var(--text-primary);
+            letter-spacing: -.3px;
+        }
+
+        .form-row { margin-bottom: 24px; }
+        .form-row label {
+            display: block; font-size: .82rem; font-weight: 700;
+            margin-bottom: 9px; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: .7px;
+        }
+        .form-row input,
+        .form-row textarea,
+        .form-row select {
+            width: 100%; padding: 14px 18px;
+            background: rgba(0,0,0,.3);
+            border: 1.5px solid var(--border);
+            border-radius: 15px;
+            font-size: .87rem; color: var(--text-primary);
+            font-family: inherit;
+            transition: all .25s ease; outline: none;
+            backdrop-filter: blur(10px);
+        }
+        .form-row input:focus,
+        .form-row textarea:focus,
+        .form-row select:focus {
+            border-color: var(--accent);
+            background: rgba(99,102,241,.06);
+            box-shadow: 0 0 0 4px rgba(99,102,241,.15);
+        }
+        .form-row textarea { resize: vertical; min-height: 80px; }
+        .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .btn-save {
+            margin-top: 14px; padding: 13px 30px;
+            background: var(--gradient-1);
+            border: none; border-radius: 40px;
+            font-size: .87rem; font-weight: 700;
+            color: white; cursor: pointer;
+            transition: all .35s cubic-bezier(.34,1.56,.64,1);
+            display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(99,102,241,.5);
+        }
+
+        .toast-feedback {
+            position: fixed; bottom: 110px; left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(17,24,39,.97); backdrop-filter: blur(20px);
+            color: white; padding: 12px 30px; border-radius: 40px;
+            font-size: .84rem; z-index: 300; font-weight: 600;
+            pointer-events: none; border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0,0,0,.4);
+            animation: toastIn .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .main-content { padding: 0 20px; }
+            .config-card { padding: 24px; }
+            .two-columns { grid-template-columns: 1fr; gap: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="background-layer">
+    <img src="bg.jpg" alt="" class="bg-image" onerror="this.style.display='none'">
+    <div class="bg-overlay"></div>
+</div>
+
+<div class="app-bar">
+    <div class="nav-container">
+        <div class="logo-area">⚙️ 站点配置</div>
+        <div style="display:flex; gap:14px; align-items:center;">
+            <div class="dropdown">
+                <button class="menu-trigger" id="navDropdownBtn">
+                    后台菜单
+                    <span class="dropdown-arrow">⌵</span>
+                </button>
+                <div class="dropdown-panel" id="navDropdownPanel">
+                    <a href="index.php?action=admin&type=API">API管理</a>
+                    <a href="index.php?action=admin&type=friend">友链管理</a>
+                    <a href="index.php?action=admin&type=set">站点配置</a>
+                </div>
+            </div>
+            <button class="logout-button" id="logoutBtn">退出登录</button>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <!-- 配置信息 -->
+    <div class="config-card">
+        <div class="card-header">📄 配置信息</div>
+        
+        <div class="form-row">
+            <label>网站标题</label>
+            <input type="text" id="siteTitle" placeholder="例如：API 导航站">
+        </div>
+
+        <div class="form-row">
+            <label>站点描述</label>
+            <textarea id="siteDesc" rows="2" placeholder="简洁优雅的 API 集合"></textarea>
+        </div>
+
+        <div class="two-columns">
+            <div class="form-row">
+                <label>站点域名</label>
+                <input type="text" id="siteDomain" placeholder="https://example.com">
+            </div>
+            <div class="form-row">
+                <label>Favicon 图标</label>
+                <input type="text" id="siteFavicon" placeholder="https://example.com/favicon.ico">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>官方群 / 底部链接</label>
+            <input type="text" id="siteLink" placeholder="https://qm.qq.com/...">
+        </div>
+
+        <div class="form-row">
+            <label>模板主题</label>
+            <select id="siteTemplate"></select>
+        </div>
+
+        <button class="btn-save" id="saveConfigBtn">💾 保存配置</button>
+    </div>
+
+    <!-- 管理员账户 -->
+    <div class="config-card">
+        <div class="card-header">🔐 管理员账户</div>
+        <div class="two-columns">
+            <div class="form-row">
+                <label>新用户名</label>
+                <input type="text" id="adminUser" placeholder="输入新用户名">
+            </div>
+            <div class="form-row">
+                <label>新密码</label>
+                <input type="password" id="adminPass" placeholder="输入新密码">
+            </div>
+        </div>
+        <button class="btn-save" id="saveAdminBtn">👤 保存账密</button>
+        <div style="font-size:.72rem; color:var(--text-muted); margin-top:14px;">
+            ⚡ 用户名和密码将同时更新
+        </div>
+    </div>
+</div>
+
+<script>
+    async function callPostApi(payload) {
+        const formBody = new URLSearchParams();
+        for (const [key, val] of Object.entries(payload)) {
+            if (val !== undefined && val !== null) formBody.append(key, val);
+        }
+        const response = await fetch('./core/post.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formBody.toString()
+        });
+        return await response.json();
+    }
+
+    function showMessage(msg, isError = false) {
+        let existing = document.querySelector('.toast-feedback');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast-feedback';
+        toast.innerText = (isError ? '❌ ' : '✅ ') + msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
+    async function loadAllConfig() {
+        const res = await callPostApi({ type: 'getConfig' });
+        if (res.code === 200 && res.data) {
+            const data = res.data;
+            document.getElementById('siteTitle').value = data.title || '';
+            document.getElementById('siteDesc').value = data.desc || '';
+            document.getElementById('siteDomain').value = data.domain || '';
+            document.getElementById('siteFavicon').value = data.favicon || '';
+            document.getElementById('siteLink').value = data.link || '';
+            
+            const templateList = data.template_list && data.template_list.length ? data.template_list : ['default'];
+            const templateSelect = document.getElementById('siteTemplate');
+            templateSelect.innerHTML = '';
+            templateList.forEach(tpl => {
+                const option = document.createElement('option');
+                option.value = tpl;
+                option.textContent = tpl;
+                if (tpl === (data.template || 'default')) option.selected = true;
+                templateSelect.appendChild(option);
+            });
+        } else {
+            showMessage('加载配置失败', true);
+        }
+    }
+
+    async function saveAllConfig() {
+        const title = document.getElementById('siteTitle').value;
+        const desc = document.getElementById('siteDesc').value;
+        const domain = document.getElementById('siteDomain').value;
+        const favicon = document.getElementById('siteFavicon').value;
+        const link = document.getElementById('siteLink').value;
+        const template = document.getElementById('siteTemplate').value;
+
+        const res = await callPostApi({
+            type: 'setConfig',
+            title, desc, domain, favicon, link, template
+        });
+
+        if (res.code === 200) {
+            showMessage('配置保存成功 ✨');
+            await loadAllConfig();
+        } else {
+            showMessage(res.msg || '保存失败', true);
+        }
+    }
+
+    async function saveAdminAccount() {
+        const admin = document.getElementById('adminUser').value.trim();
+        const password = document.getElementById('adminPass').value;
+
+        if (!admin && !password) {
+            showMessage('请填写用户名或密码', true);
+            return;
+        }
+        if (!admin) {
+            showMessage('用户名不能为空', true);
+            return;
+        }
+        if (!password) {
+            showMessage('密码不能为空', true);
+            return;
+        }
+
+        const res = await callPostApi({ type: 'setAdmin', admin, password });
+
+        if (res.code === 200) {
+            showMessage('账密更新成功 ✨');
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
+        } else {
+            showMessage(res.msg || '更新失败', true);
+        }
+    }
+
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        await callPostApi({ type: 'clear' });
+        window.location.href = 'index.php?action=admin&type=login';
+    });
+
+    const dropBtn = document.getElementById('navDropdownBtn');
+    const dropPanel = document.getElementById('navDropdownPanel');
+    if (dropBtn && dropPanel) {
+        dropBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropPanel.classList.toggle('open');
+        });
+        document.addEventListener('click', (e) => {
+            if (!dropBtn.contains(e.target) && !dropPanel.contains(e.target)) {
+                dropPanel.classList.remove('open');
+            }
+        });
+    }
+
+    document.getElementById('saveConfigBtn')?.addEventListener('click', saveAllConfig);
+    document.getElementById('saveAdminBtn')?.addEventListener('click', saveAdminAccount);
+
+    loadAllConfig();
+</script>
+</body>
+</html>
