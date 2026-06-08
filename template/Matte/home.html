@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading...</title>
+
+    <style>
+        :root{
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.25);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --text: #ffffff;
+            --sub: rgba(255, 255, 255, 0.7);
+            --accent: #ffffff;
+            --hover-bg: rgba(255, 255, 255, 0.1);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+        
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+        
+        body{
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* 背景层 */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease;
+            z-index: 0;
+        }
+        
+        .bg-layer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.35);
+        }
+        
+        /* 主内容容器 */
+        .app-wrapper {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+        
+        a{
+            color: white;
+            text-decoration:none;
+        }
+        
+        /* 磨砂玻璃导航 */
+        .header{
+            position:sticky;
+            top:0;
+            z-index:100;
+            backdrop-filter:blur(12px);
+            background: var(--glass-bg);
+            border-bottom:1px solid var(--glass-border);
+        }
+        
+        .nav{
+            max-width:1200px;
+            margin:auto;
+            padding:14px 20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+        }
+        
+        .logo{
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+        
+        .logo img{
+            width:42px;
+            height:42px;
+            border-radius:12px;
+            object-fit:cover;
+        }
+        
+        .logo h1{
+            font-size:20px;
+            font-weight:700;
+            color: white;
+        }
+        
+        /* 菜单按钮 - 只有三横线 */
+        .menu-btn{
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 24px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dropdown{
+            position:absolute;
+            top:65px;
+            right:20px;
+            width:180px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(16px);
+            border:1px solid var(--glass-border);
+            border-radius:16px;
+            overflow:hidden;
+            box-shadow: var(--glass-shadow);
+            display:none;
+        }
+        
+        .dropdown.show{
+            display:block;
+        }
+        
+        .dropdown a{
+            display:block;
+            padding:14px 16px;
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .dropdown a:hover{
+            background: rgba(255,255,255,0.15);
+            text-decoration:none;
+        }
+        
+        .container{
+            max-width:1200px;
+            margin:auto;
+            padding:20px;
+        }
+        
+        .search{
+            width:100%;
+            border:none;
+            outline:none;
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            color: white;
+            border-radius: var(--radius-lg);
+            padding:16px 18px;
+            box-shadow: var(--glass-shadow);
+            margin-bottom:20px;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .search::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+        
+        .api-list{
+            display:flex;
+            flex-direction:column;
+            gap:16px;
+        }
+        
+        .card{
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-radius:22px;
+            padding:18px;
+            box-shadow: var(--glass-shadow);
+            cursor:pointer;
+            transition: transform 0.15s ease, background 0.2s;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .card:active{
+            transform: scale(0.99);
+        }
+        
+        .card:hover{
+            background: rgba(255,255,255,0.25);
+        }
+        
+        .card-top{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+        
+        .api-title{
+            font-size:18px;
+            font-weight:700;
+            line-height:1.5;
+            word-break:break-word;
+            flex:1;
+            color: white;
+        }
+        
+        /* 统计图标 - 固定大小柱状图，数字跟在后面 */
+        .stats-mini{
+            display:flex;
+            align-items:center;
+            gap:6px;
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+        
+        .bar-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: transparent;
+        }
+        
+        /* 三根柱状图高度固定，不再根据数字变化 */
+        .bar {
+            width: 4px;
+            height: 5px;
+            background: white;
+            border-radius: 2px;
+        }
+        .bar:nth-child(2) {
+            height: 8px;
+        }
+        .bar:nth-child(3) {
+            height: 14px;
+        }
+        
+        .bar-icon .count-num {
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+            margin-left: 6px;
+            letter-spacing: 0.3px;
+        }
+        
+        .card-right{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            flex-shrink:0;
+        }
+        
+        .api-access{
+            display: none;
+        }
+        
+        .doc-btn{
+            display: none;
+        }
+        
+        .api-desc{
+            margin-top:12px;
+            color: rgba(255,255,255,0.8);
+            line-height:1.8;
+            display:-webkit-box;
+            -webkit-line-clamp:3;
+            -webkit-box-orient:vertical;
+            overflow:hidden;
+        }
+        
+        /* 抽屉菜单 - 磨砂玻璃 */
+        .drawer{
+            position:fixed;
+            left:0;
+            bottom:0;
+            width:100%;
+            height:85%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(20px);
+            border-radius:24px 24px 0 0;
+            transform:translateY(100%);
+            transition:.3s;
+            z-index:999;
+            overflow:auto;
+            border-top: 1px solid var(--glass-border);
+        }
+        
+        .drawer.show{
+            transform:none;
+        }
+        
+        .drawer-content{
+            padding:24px;
+            color: white;
+        }
+        
+        .close{
+            position:absolute;
+            top:20px;
+            right:20px;
+            border:none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor:pointer;
+            font-size:20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .section{
+            margin-top:24px;
+        }
+        
+        .section h3{
+            margin-bottom:12px;
+            color: white;
+        }
+        
+        .url-box{
+            background: rgba(255,255,255,0.1);
+            border-radius:12px;
+            padding:12px;
+            word-break:break-all;
+        }
+        
+        .url-box a {
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .desc-full{
+            white-space:pre-wrap;
+            line-height:1.8;
+        }
+        
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+        
+        th,td{
+            border:1px solid var(--glass-border);
+            padding:10px;
+            text-align:left;
+            color: white;
+        }
+        
+        th {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .modal{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            display:none;
+            justify-content:center;
+            align-items:center;
+            z-index:1000;
+        }
+        
+        .modal.show{
+            display:flex;
+        }
+        
+        .modal-card{
+            position:relative;
+            width:90%;
+            max-width:520px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(20px);
+            border-radius:20px;
+            padding:24px;
+            border: 1px solid var(--glass-border);
+            color: white;
+        }
+        
+        .stats{
+            margin-top:20px;
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:12px;
+        }
+        
+        .stat{
+            background: rgba(255,255,255,0.1);
+            border-radius:14px;
+            padding:14px;
+        }
+        
+        .stat-title{
+            color: rgba(255,255,255,0.7);
+            font-size:13px;
+        }
+        
+        .stat-value{
+            margin-top:6px;
+            font-size:22px;
+            font-weight:700;
+            color: white;
+        }
+        
+        /* 离开确认弹窗 */
+        .confirm-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .confirm-card {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 28px 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+        }
+        .confirm-card p {
+            color: white;
+            margin-bottom: 24px;
+            font-size: 16px;
+        }
+        .confirm-card .confirm-url {
+            color: #3b82f6;
+            margin-bottom: 20px;
+            font-size: 14px;
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 12px;
+            word-break: break-all;
+        }
+        .confirm-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        .confirm-btn {
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .confirm-cancel {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        .confirm-cancel:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        .confirm-ok {
+            background: white;
+            color: #1a1f2e;
+        }
+        .confirm-ok:hover {
+            background: #e0e0e0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-layer" id="bgLayer"></div>
+    
+    <div class="app-wrapper">
+        <header class="header">
+            <div class="nav">
+                <div class="logo">
+                    <img id="favicon" src="">
+                    <h1 id="siteTitle">Loading...</h1>
+                </div>
+                <button class="menu-btn" onclick="toggleMenu()">☰</button>
+                <div class="dropdown" id="menu">
+                    <a href="index.php?action=admin">后台管理</a>
+                    <a href="index.php?action=friend">友情链接</a>
+                    <a href="#" onclick="openGroup()">交流群组</a>
+                    <a href="#" onclick="showStats()">数据统计</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <input id="search" class="search" placeholder="搜索 API..." autocomplete="off">
+            <div class="api-list" id="apiList"></div>
+        </div>
+
+        <div class="drawer" id="drawer">
+            <button class="close" onclick="closeDoc()">✕</button>
+            <div class="drawer-content" id="docContent"></div>
+        </div>
+
+        <div class="modal" id="statsModal">
+            <div class="modal-card">
+                <button class="close" onclick="hideStats()">✕</button>
+                <h2>数据统计</h2>
+                <div class="stats" id="statsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 随机背景图
+        const bgImages = ['1.png', '2.png'];
+        
+        function setRandomBackground() {
+            const randomIndex = Math.floor(Math.random() * bgImages.length);
+            const bgUrl = `./assets/background/${bgImages[randomIndex]}`;
+            const img = new Image();
+            img.onload = function() {
+                document.getElementById('bgLayer').style.backgroundImage = `url('${bgUrl}')`;
+            };
+            img.onerror = function() {
+                document.getElementById('bgLayer').style.backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            };
+            img.src = bgUrl;
+        }
+        setRandomBackground();
+        
+        let DATA=null;
+        
+        fetch("./core/api.php?type=getAllApi")
+        .then(r=>r.json())
+        .then(res=>{
+            DATA=res.data;
+            document.title=DATA.title;
+            siteTitle.innerText=DATA.title;
+            favicon.src=DATA.favicon;
+            renderApis(DATA.API||[]);
+        });
+        
+        function formatCount(num){
+            num=Number(num)||0;
+            if(num>=10000) return (num/10000).toFixed(1)+"w";
+            return String(num);
+        }
+        
+        // 柱状图固定样式，不再根据数字变化高度
+        function getBarChartIcon(count) {
+            const numStr = formatCount(count);
+            return `
+                <div class="bar-icon">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <span class="count-num">${numStr}</span>
+                </div>
+            `;
+        }
+        
+        function renderApis(list){
+            apiList.innerHTML="";
+            list.forEach(api=>{
+                const barIcon = getBarChartIcon(api.Access);
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'card';
+                cardDiv.addEventListener('click', (e) => {
+                    if(e.target.closest('.copy-link')) {
+                        e.stopPropagation();
+                        return;
+                    }
+                    showDoc(api);
+                });
+                cardDiv.innerHTML = `
+                    <div class="card-top">
+                        <div class="api-title">${escapeHtml(api.title)}</div>
+                        <div class="card-right"></div>
+                    </div>
+                    <div class="api-desc">${escapeHtml(api.desc)}</div>
+                `;
+                const cardTop = cardDiv.querySelector('.card-top');
+                if(cardTop) {
+                    const statRow = document.createElement('div');
+                    statRow.className = 'stats-mini';
+                    statRow.innerHTML = barIcon;
+                    cardTop.insertAdjacentElement('afterend', statRow);
+                }
+                apiList.appendChild(cardDiv);
+            });
+        }
+        
+        function escapeHtml(str) {
+            if(!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if(m === '&') return '&amp;';
+                if(m === '<') return '&lt;';
+                if(m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        function buildUrl(path){
+            return DATA.domain.replace(/\/$/,'') + '/API/' + path.replace(/^\//,'');
+        }
+        
+        function showDoc(api){
+            let requestRows='';
+            if(api.request && Array.isArray(api.request)){
+                api.request.forEach(i=>{
+                    requestRows+=`<tr><td>${escapeHtml(i[0]||'')}</td><td>${escapeHtml(i[1]||'')}</td><td>${escapeHtml(i[2]||'')}</td></tr>`;
+                });
+            }
+            let responseRows='';
+            if(api.response && Array.isArray(api.response)){
+                api.response.forEach(i=>{
+                    responseRows+=`<tr><td>${escapeHtml(i[0]||'')}</td><td>${escapeHtml(i[1]||'')}</td><td>${escapeHtml(i[2]||'')}</td></tr>`;
+                });
+            }
+            const url=buildUrl(api.url);
+            const exampleUrl = buildUrl(api.example);
+            docContent.innerHTML=`
+                <h2>${escapeHtml(api.title)}</h2>
+                <div class="section"><div class="desc-full">${escapeHtml(api.desc)}</div></div>
+                <div class="section">
+                    <h3>调用地址</h3>
+                    <div class="url-box"><a href="${escapeHtmlAttr(url)}" target="_blank" class="copy-link" data-copy="${escapeHtmlAttr(url)}">${escapeHtml(url)}</a></div>
+                </div>
+                <div class="section">
+                    <h3>调用示例</h3>
+                    <div class="url-box"><a href="${escapeHtmlAttr(exampleUrl)}" target="_blank" class="copy-link" data-copy="${escapeHtmlAttr(exampleUrl)}">${escapeHtml(exampleUrl)}</a></div>
+                </div>
+                <div class="section">
+                    <h3>请求参数</h3>
+                    <table><thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead><tbody>${requestRows}</tbody></table>
+                </div>
+                <div class="section">
+                    <h3>返回参数</h3>
+                    <td><thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead><tbody>${responseRows}</tbody></table>
+                </div>
+            `;
+            drawer.classList.add("show");
+        }
+        
+        function escapeHtmlAttr(str){
+            if(!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        
+        function closeDoc(){ drawer.classList.remove("show"); }
+        function toggleMenu(){ menu.classList.toggle("show"); }
+        
+        function openGroup(){
+            if(DATA?.link) {
+                showLeaveConfirm(DATA.link);
+            }
+        }
+        
+        function showLeaveConfirm(url) {
+            const modal = document.createElement('div');
+            modal.className = 'confirm-modal';
+            modal.innerHTML = `
+                <div class="confirm-card">
+                    <p>⚠️ 即将离开本站</p>
+                    <div class="confirm-url">${escapeHtml(url)}</div>
+                    <div class="confirm-buttons">
+                        <button class="confirm-btn confirm-cancel" id="confirmCancel">取消</button>
+                        <button class="confirm-btn confirm-ok" id="confirmOk">确定前往</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('confirmCancel').onclick = () => modal.remove();
+            document.getElementById('confirmOk').onclick = () => {
+                window.open(url, '_blank', 'noopener noreferrer');
+                modal.remove();
+            };
+        }
+        
+        function showStats(){
+            statsContent.innerHTML=`
+                <div class="stat"><div class="stat-title">总调用</div><div class="stat-value">${formatCount(DATA.Access)}</div></div>
+                <div class="stat"><div class="stat-title">蜘蛛访问</div><div class="stat-value">${formatCount(DATA.Spider)}</div></div>
+                <div class="stat"><div class="stat-title">今日调用</div><div class="stat-value">${formatCount(DATA.todayAccess)}</div></div>
+                <div class="stat"><div class="stat-title">今日蜘蛛</div><div class="stat-value">${formatCount(DATA.todaySpider)}</div></div>
+                <div class="stat"><div class="stat-title">昨日调用</div><div class="stat-value">${formatCount(DATA.yesterdayAccess)}</div></div>
+                <div class="stat"><div class="stat-title">昨日蜘蛛</div><div class="stat-value">${formatCount(DATA.yesterdaySpider)}</div></div>
+            `;
+            statsModal.classList.add("show");
+        }
+        
+        function hideStats(){ statsModal.classList.remove("show"); }
+        
+        const searchInput = document.getElementById('search');
+        searchInput.addEventListener("input",e=>{
+            if(!DATA) return;
+            const keyword=e.target.value.trim().toLowerCase();
+            if(!keyword){ renderApis(DATA.API); return; }
+            const filtered = DATA.API.filter(api=> api.title.toLowerCase().includes(keyword) || api.desc.toLowerCase().includes(keyword));
+            renderApis(filtered);
+        });
+        
+        document.addEventListener("pointerdown",e=>{
+            const link=e.target.closest(".copy-link");
+            if(!link) return;
+            e.stopPropagation();
+            const timer=setTimeout(()=>{ navigator.clipboard.writeText(link.dataset.copy).catch(()=>{}); },600);
+            const clear=()=>{ clearTimeout(timer); document.removeEventListener("pointerup",clear); document.removeEventListener("pointercancel",clear); };
+            document.addEventListener("pointerup",clear);
+            document.addEventListener("pointercancel",clear);
+        });
+        
+        document.addEventListener("click",e=>{
+            if(!menu.contains(e.target) && !e.target.closest(".menu-btn")){ menu.classList.remove("show"); }
+        });
+        
+        window.toggleMenu = toggleMenu;
+        window.openGroup = openGroup;
+        window.showStats = showStats;
+        window.hideStats = hideStats;
+        window.closeDoc = closeDoc;
+    </script>
+</body>
+</html>

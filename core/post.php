@@ -10,6 +10,7 @@ if (empty($type)) json(-1,"缺少参数");
 // 定义路径
 define("__API__", dirname(__DIR__) . "/database/API.json");
 define("__FRIEND__", dirname(__DIR__) . "/database/friend.json");
+define("__APIACCESS__", dirname(__DIR__) . "/database/ApiAccess.json");
 define("__CONFIG__", dirname(__DIR__) . "/database/config.php");
 define("__ADMIN__", dirname(__DIR__) . "/database/admin.php");
 
@@ -225,6 +226,13 @@ switch ($type) {
             continue;
         }        
         @file_put_contents(__API__, json_encode($list, 480));
+        
+        // 更改统计文件
+        $access = @file_get_contents(__APIACCESS__);
+        $access = json_decode($access,true);
+        unset($access[$id]);
+        @file_put_contents(__APIACCESS__, json_encode($access,480));
+        
         // 输出结果
         json(200,"删除成功");
         break;

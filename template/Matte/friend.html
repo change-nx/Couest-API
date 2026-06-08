@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>友情链接</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease;
+            z-index: 0;
+        }
+
+        .bg-layer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        .app-wrapper {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.25);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --text: #ffffff;
+            --sub: rgba(255, 255, 255, 0.7);
+            --accent: #ffffff;
+            --hover-bg: rgba(255, 255, 255, 0.1);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 14px;
+            --radius-sm: 12px;
+            --transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: auto;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        /* 菜单按钮 - 只有三横线 */
+        .menu-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 24px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 65px;
+            right: 20px;
+            width: 180px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            display: none;
+        }
+
+        .dropdown.show {
+            display: block;
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 14px 16px;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            text-decoration: none;
+        }
+
+        .carousel-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius-xl);
+            margin-bottom: 32px;
+            padding: 20px 16px 24px 16px;
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
+        }
+
+        .carousel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            padding-left: 6px;
+            color: white;
+        }
+
+        .carousel-title i {
+            font-size: 1.3rem;
+            color: white;
+        }
+
+        .carousel-title span:first-child {
+            background: white;
+            width: 6px;
+            height: 24px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .swiper-container {
+            overflow: hidden;
+            border-radius: var(--radius-lg);
+            position: relative;
+        }
+
+        .swiper-wrapper {
+            display: flex;
+            transition-timing-function: cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .swiper-slide {
+            flex-shrink: 0;
+            width: 100%;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .friend-carousel-card {
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .friend-carousel-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .carousel-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .carousel-info {
+            padding: 18px 16px 20px;
+        }
+
+        .carousel-info h3 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .carousel-desc {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            line-height: 1.45;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            width: 24px;
+            background: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 20px 40px;
+        }
+
+        .api-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 22px;
+            padding: 18px;
+            box-shadow: var(--glass-shadow);
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.2s;
+            border: 1px solid var(--glass-border);
+        }
+
+        .card:active {
+            transform: scale(0.99);
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .card-top {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .api-title {
+            font-size: 18px;
+            font-weight: 700;
+            word-break: break-word;
+            color: white;
+        }
+
+        .api-desc {
+            margin-top: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        .friend-image-thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            object-fit: cover;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--glass-border);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--glass-border);
+        }
+
+        .loading-skeleton {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 22px;
+            padding: 18px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            border: 1px solid var(--glass-border);
+        }
+
+        .skeleton-img {
+            width: 52px;
+            height: 52px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            animation: pulse 1.2s infinite;
+        }
+
+        .skeleton-text {
+            flex: 1;
+        }
+
+        .skeleton-line {
+            height: 18px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            width: 80%;
+            animation: pulse 1.2s infinite;
+        }
+
+        .skeleton-line.short {
+            width: 60%;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.4; }
+        }
+
+        /* 离开确认弹窗 */
+        .confirm-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .confirm-card {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 28px 32px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+        }
+        .confirm-card p {
+            color: white;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+        .confirm-card .confirm-url {
+            color: #3b82f6;
+            margin-bottom: 24px;
+            font-size: 14px;
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 12px;
+            word-break: break-all;
+        }
+        .confirm-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        .confirm-btn {
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .confirm-cancel {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        .confirm-cancel:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        .confirm-ok {
+            background: white;
+            color: #1a1f2e;
+        }
+        .confirm-ok:hover {
+            background: #e0e0e0;
+        }
+
+        @media (max-width: 640px) {
+            .container { padding: 16px; }
+            .friend-image-thumb { width: 42px; height: 42px; }
+            .carousel-info h3 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-layer" id="bgLayer"></div>
+    
+    <div class="app-wrapper">
+        <div class="header">
+            <div class="nav">
+                <div class="logo">
+                    <i class="fas fa-link" style="color: white; font-size: 24px;"></i>
+                    <h1>友情链接</h1>
+                </div>
+                <button class="menu-btn" id="menuBtn">☰</button>
+                <div class="dropdown" id="dropdown">
+                    <a href="./#"><i class="fas fa-home"></i> 首页</a>
+                </div>
+            </div>
+        </div>
+
+        <main class="container">
+            <div class="carousel-section" id="carouselSection" style="display: none;">
+                <div class="carousel-title">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span>精选伙伴</span>
+                </div>
+                <div class="swiper-container" id="swiperContainer">
+                    <div class="swiper-wrapper" id="carouselWrapper"></div>
+                </div>
+                <div class="dots" id="dotsContainer"></div>
+            </div>
+
+            <div id="friendList" class="api-list">
+                <div class="loading-skeleton"><div class="skeleton-img"></div><div class="skeleton-text"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+                <div class="loading-skeleton"><div class="skeleton-img"></div><div class="skeleton-text"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+                <div class="loading-skeleton"><div class="skeleton-img"></div><div class="skeleton-text"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 随机背景图
+        const bgImages = ['1.png', '2.png'];
+        
+        function setRandomBackground() {
+            const randomIndex = Math.floor(Math.random() * bgImages.length);
+            const bgUrl = `./assets/background/${bgImages[randomIndex]}`;
+            const img = new Image();
+            img.onload = function() {
+                document.getElementById('bgLayer').style.backgroundImage = `url('${bgUrl}')`;
+            };
+            img.onerror = function() {
+                document.getElementById('bgLayer').style.backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            };
+            img.src = bgUrl;
+        }
+        setRandomBackground();
+        
+        // 离开确认弹窗函数
+        function showLeaveConfirm(url) {
+            const modal = document.createElement('div');
+            modal.className = 'confirm-modal';
+            modal.innerHTML = `
+                <div class="confirm-card">
+                    <p><i class="fas fa-external-link-alt"></i> 即将离开本站</p>
+                    <div class="confirm-url">${escapeHtml(url)}</div>
+                    <div class="confirm-buttons">
+                        <button class="confirm-btn confirm-cancel" id="confirmCancel">取消</button>
+                        <button class="confirm-btn confirm-ok" id="confirmOk">确定前往</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const closeModal = () => modal.remove();
+            document.getElementById('confirmCancel').onclick = closeModal;
+            document.getElementById('confirmOk').onclick = () => {
+                window.open(url, '_blank', 'noopener noreferrer');
+                closeModal();
+            };
+        }
+        
+        // 跳转函数 - 带确认弹窗
+        function handleLinkClick(url) {
+            if (url && url.trim()) {
+                showLeaveConfirm(url);
+            } else {
+                alert('当前友链暂无有效网址');
+            }
+        }
+        
+        const friendContainer = document.getElementById('friendList');
+        const carouselSection = document.getElementById('carouselSection');
+        const carouselWrapper = document.getElementById('carouselWrapper');
+        const dotsContainer = document.getElementById('dotsContainer');
+        
+        let friendsData = [];
+        let carouselItems = [];
+        let currentIndex = 0;
+        let autoInterval = null;
+        
+        async function fetchFriends() {
+            try {
+                const apiUrl = './core/api.php?type=getFriend';
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
+                if (result.code === 200 && Array.isArray(result.data)) {
+                    friendsData = result.data.filter(item => item && typeof item === 'object' && item.title && item.url);
+                    renderAll();
+                } else {
+                    throw new Error(result.msg || '数据格式异常');
+                }
+            } catch (error) {
+                console.error('获取友链失败:', error);
+                friendContainer.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> 加载失败，请检查网络或api接口<br>尝试刷新页面</div>`;
+                carouselSection.style.display = 'none';
+            }
+        }
+        
+        function shuffleArray(arr) {
+            const array = [...arr];
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        function renderAll() {
+            renderCardList(friendsData);
+            const shuffled = shuffleArray(friendsData);
+            updateCarousel(shuffled);
+        }
+        
+        function renderCardList(data) {
+            if (!data.length) {
+                friendContainer.innerHTML = `<div class="empty-state"><i class="fas fa-heart"></i> 暂无友链数据，期待新朋友加入~</div>`;
+                return;
+            }
+            const html = data.map(friend => {
+                const imgHtml = friend.image && friend.image.trim() !== '' ? 
+                    `<img class="friend-image-thumb" src="${escapeHtml(friend.image)}" alt="${escapeHtml(friend.title)}" onerror="this.onerror=null;this.src='';this.style.background='rgba(255,255,255,0.2)';">` :
+                    `<div class="friend-image-thumb" style="display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.2);color:white;font-weight:bold;font-size:20px;"><i class="fas fa-globe"></i></div>`;
+                return `
+                    <div class="card" data-url="${escapeAttr(friend.url)}">
+                        <div class="card-top">
+                            ${imgHtml}
+                            <div style="flex:1;">
+                                <div class="api-title">${escapeHtml(friend.title)}</div>
+                            </div>
+                        </div>
+                        <div class="api-desc"><i class="fas fa-info-circle"></i> ${escapeHtml(friend.desc || '暂无介绍，期待探索更多精彩~')}</div>
+                    </div>
+                `;
+            }).join('');
+            friendContainer.innerHTML = html;
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const url = card.getAttribute('data-url');
+                    handleLinkClick(url);
+                });
+            });
+        }
+        
+        function updateCarousel(dataList) {
+            if (!dataList || dataList.length === 0) {
+                carouselSection.style.display = 'none';
+                if (autoInterval) clearInterval(autoInterval);
+                return;
+            }
+            const maxCarousel = Math.min(dataList.length, 6);
+            carouselItems = dataList.slice(0, maxCarousel);
+            if (carouselItems.length === 0) {
+                carouselSection.style.display = 'none';
+                return;
+            }
+            carouselSection.style.display = 'block';
+            renderCarouselSlides();
+            currentIndex = 0;
+            updateCarouselPosition();
+            generateDots();
+            startAutoPlay();
+        }
+        
+        function renderCarouselSlides() {
+            if (!carouselWrapper) return;
+            const slidesHtml = carouselItems.map(item => {
+                const imgSrc = item.image && item.image.trim() !== '' ? item.image : '';
+                const imageMarkup = imgSrc ? 
+                    `<img class="carousel-img" src="${escapeHtml(imgSrc)}" alt="${escapeHtml(item.title)}" onerror="this.src='';this.style.background='rgba(255,255,255,0.2)';">` :
+                    `<div class="carousel-img" style="background: linear-gradient(120deg, rgba(30,30,60,0.8), rgba(20,20,50,0.9)); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;"><i class="fas fa-handshake"></i></div>`;
+                return `
+                    <div class="swiper-slide">
+                        <div class="friend-carousel-card" data-url="${escapeAttr(item.url)}">
+                            ${imageMarkup}
+                            <div class="carousel-info">
+                                <h3>${escapeHtml(item.title)}</h3>
+                                <div class="carousel-desc">${escapeHtml(item.desc || '发现宝藏网站，点击立即探索')}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            carouselWrapper.innerHTML = slidesHtml;
+            document.querySelectorAll('.friend-carousel-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const url = card.getAttribute('data-url');
+                    handleLinkClick(url);
+                });
+            });
+        }
+        
+        function updateCarouselPosition() {
+            if (!carouselWrapper || carouselItems.length === 0) return;
+            const container = carouselWrapper.parentElement;
+            if (!container) return;
+            const slideWidth = container.clientWidth;
+            const offset = -currentIndex * slideWidth;
+            carouselWrapper.style.transform = `translateX(${offset}px)`;
+            carouselWrapper.style.transition = 'transform 0.35s ease-out';
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, idx) => {
+                if (idx === currentIndex) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+        }
+        
+        function generateDots() {
+            if (!dotsContainer) return;
+            if (carouselItems.length <= 1) {
+                dotsContainer.innerHTML = '';
+                return;
+            }
+            let dotsHtml = '';
+            for (let i = 0; i < carouselItems.length; i++) {
+                dotsHtml += `<div class="dot ${i === currentIndex ? 'active' : ''}" data-index="${i}"></div>`;
+            }
+            dotsContainer.innerHTML = dotsHtml;
+            document.querySelectorAll('.dot').forEach(dot => {
+                dot.addEventListener('click', (e) => {
+                    const idx = parseInt(dot.getAttribute('data-index'));
+                    if (!isNaN(idx) && idx !== currentIndex) {
+                        currentIndex = idx;
+                        updateCarouselPosition();
+                        resetAutoPlay();
+                    }
+                });
+            });
+        }
+        
+        function goNext() {
+            if (carouselItems.length === 0) return;
+            currentIndex = (currentIndex + 1) % carouselItems.length;
+            updateCarouselPosition();
+            resetAutoPlay();
+        }
+        
+        function startAutoPlay() {
+            if (autoInterval) clearInterval(autoInterval);
+            if (carouselItems.length <= 1) return;
+            autoInterval = setInterval(() => goNext(), 4000);
+        }
+        
+        function resetAutoPlay() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                startAutoPlay();
+            }
+        }
+        
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            if (carouselItems.length) {
+                if (resizeTimer) clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => updateCarouselPosition(), 100);
+            }
+        });
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        function escapeAttr(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        }
+        
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdown = document.getElementById('dropdown');
+        if (menuBtn && dropdown) {
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+            });
+            document.addEventListener('click', (e) => {
+                if (!dropdown.contains(e.target) && e.target !== menuBtn) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        }
+        
+        fetchFriends();
+    </script>
+</body>
+</html>

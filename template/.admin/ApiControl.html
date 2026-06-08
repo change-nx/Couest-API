@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>API 管理 · 控制台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f6f8fc;
+            font-family: 'Inter', system-ui, -apple-system, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', Roboto, sans-serif;
+            color: #0f172a;
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        :root {
+            --bg-page: #f6f8fc;
+            --card-bg: #ffffff;
+            --text-main: #0a0f1c;
+            --text-muted: #4b5569;
+            --text-placeholder: #94a3b8;
+            --border-light: #eef2f8;
+            --border-strong: #e2e8f0;
+            --accent: #2463eb;
+            --accent-hover: #1a4fbf;
+            --accent-soft: rgba(36, 99, 235, 0.08);
+            --danger: #e5484d;
+            --danger-hover: #cc3b40;
+            --danger-soft: rgba(229, 72, 77, 0.06);
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 14px;
+            --radius-sm: 12px;
+            --transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-page: #0c111b;
+                --card-bg: #131a26;
+                --text-main: #edf2f7;
+                --text-muted: #9aa9bf;
+                --text-placeholder: #4f5b6b;
+                --border-light: #1f2a3a;
+                --border-strong: #2d3848;
+                --accent: #3b82f6;
+                --accent-hover: #5b9eff;
+                --accent-soft: rgba(59, 130, 246, 0.12);
+                --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+                --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        body {
+            background: var(--bg-page);
+        }
+
+        /* 顶部导航 */
+        .app-bar {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+        .nav-container {
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo-area {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--accent);
+            letter-spacing: -0.3px;
+            background: var(--accent-soft);
+            padding: 6px 16px;
+            border-radius: 40px;
+        }
+        .dropdown {
+            position: relative;
+        }
+        .menu-trigger {
+            background: var(--card-bg);
+            border: 1px solid var(--border-strong);
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-xs);
+        }
+        .menu-trigger:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+        }
+        .dropdown-arrow {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+        .dropdown-panel {
+            position: absolute;
+            top: 46px;
+            left: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            min-width: 160px;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.15s;
+            z-index: 40;
+            overflow: hidden;
+        }
+        .dropdown-panel.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .dropdown-panel a {
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+        .dropdown-panel a:last-child {
+            border-bottom: none;
+        }
+        .dropdown-panel a:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+        .logout-button {
+            background: transparent;
+            border: 1px solid var(--border-strong);
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .logout-button:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: var(--danger-soft);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            max-width: 1360px;
+            margin: 32px auto;
+            padding: 0 28px;
+        }
+
+        /* 表格卡片 */
+        .data-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            box-shadow: var(--shadow-xs);
+            transition: var(--transition);
+        }
+        .responsive-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .responsive-table th {
+            text-align: left;
+            padding: 16px 20px;
+            background: var(--bg-page);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .responsive-table td {
+            padding: 18px 20px;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+        .responsive-table tr:last-child td {
+            border-bottom: none;
+        }
+        .responsive-table tr:hover td {
+            background: var(--accent-soft);
+        }
+
+        .id-badge {
+            font-family: monospace;
+            font-weight: 500;
+            background: var(--bg-page);
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            display: inline-block;
+            color: var(--accent);
+            border: 1px solid var(--border-strong);
+        }
+        .api-url {
+            font-family: 'SF Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent);
+            word-break: break-all;
+            max-width: 320px;
+            display: inline-block;
+        }
+        .action-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .action-chip {
+            background: var(--card-bg);
+            border: 1px solid var(--border-strong);
+            padding: 6px 14px;
+            border-radius: 32px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-muted);
+        }
+        .action-chip.edit:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .action-chip.delete:hover {
+            background: var(--danger-soft);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 70px 20px;
+            color: var(--text-placeholder);
+            font-size: 0.9rem;
+        }
+
+        /* 分页 */
+        .pagination-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 24px;
+            align-items: center;
+        }
+        .page-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            padding: 8px 15px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-muted);
+        }
+        .page-item.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        .page-item.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .page-item:not(.disabled):hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* FAB */
+        .fab-add {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 56px;
+            height: 56px;
+            background: var(--accent);
+            border: none;
+            border-radius: 28px;
+            color: white;
+            font-size: 26px;
+            font-weight: 400;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 45;
+        }
+        .fab-add:hover {
+            background: var(--accent-hover);
+            transform: scale(1.03);
+            box-shadow: 0 12px 28px rgba(36, 99, 235, 0.25);
+        }
+
+        /* 模态框 */
+        .modal-mask {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.2s;
+        }
+        .modal-mask.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-container {
+            background: var(--card-bg);
+            width: 680px;
+            max-width: 92vw;
+            max-height: 88vh;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 20px 26px;
+            border-bottom: 1px solid var(--border-light);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .modal-body {
+            padding: 24px 26px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .field-group {
+            margin-bottom: 20px;
+        }
+        .field-group label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+        .field-group input, .field-group textarea {
+            width: 100%;
+            background: var(--bg-page);
+            border: 1.5px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            font-family: inherit;
+            transition: var(--transition);
+            outline: none;
+        }
+        .field-group input:focus, .field-group textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        .param-block {
+            margin-top: 28px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .param-block-title {
+            background: var(--bg-page);
+            padding: 12px 18px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-muted);
+        }
+        .param-inner-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .param-inner-table th {
+            text-align: left;
+            padding: 12px 12px;
+            background: var(--bg-page);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-light);
+        }
+        .param-inner-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .param-inner-table input {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+        .param-inner-table input:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+        .remove-param-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--danger);
+            opacity: 0.7;
+            transition: 0.2s;
+            padding: 0 6px;
+        }
+        .remove-param-btn:hover {
+            opacity: 1;
+        }
+        .add-param-button {
+            margin: 14px 16px 16px 16px;
+            background: transparent;
+            border: 1px dashed var(--border-strong);
+            border-radius: 40px;
+            padding: 8px 18px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--accent);
+            display: inline-block;
+        }
+        .add-param-button:hover {
+            background: var(--accent-soft);
+            border-style: solid;
+            border-color: var(--accent);
+        }
+        .modal-footer {
+            padding: 18px 26px;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .btn-modal {
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid var(--border-strong);
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-primary-modal {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        .btn-primary-modal:hover {
+            background: var(--accent-hover);
+        }
+        .toast-feedback {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937dd;
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 10px 26px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            z-index: 300;
+            font-weight: 500;
+            pointer-events: none;
+        }
+
+        @media (max-width: 700px) {
+            .nav-container { padding: 10px 20px; }
+            .main-content { padding: 0 20px; }
+            .responsive-table th, .responsive-table td { padding: 12px 14px; }
+            .api-url { max-width: 180px; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-bar">
+    <div class="nav-container">
+        <div class="logo-area">API 管理</div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <div class="dropdown">
+                <button class="menu-trigger" id="navDropdownBtn">
+                    后台菜单
+                    <span class="dropdown-arrow">⌵</span>
+                </button>
+                <div class="dropdown-panel" id="navDropdownPanel">
+                    <a href="index.php?action=admin&type=API">API管理</a>
+                    <a href="index.php?action=admin&type=friend">友链管理</a>
+                    <a href="index.php?action=admin&type=set">站点配置</a>
+                </div>
+            </div>
+            <button class="logout-button" id="logoutBtn">退出登录</button>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div id="tableWrapper" style="min-height: 300px;">加载中...</div>
+    <div id="paginationWrapper"></div>
+</div>
+
+<button class="fab-add" id="createFab">+</button>
+
+<script>
+    // ---------- 全局变量 ----------
+    let globalApiList = [];      // 存储所有API
+    let currentPageNum = 1;
+    let rowsPerPage = 10;
+
+    // ---------- 后端通信 ----------
+    async function callBackend(payload) {
+        const formData = new URLSearchParams();
+        for (const [key, val] of Object.entries(payload)) {
+            if (val !== undefined && val !== null) formData.append(key, val);
+        }
+        const response = await fetch('./core/post.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+        return await response.json();
+    }
+
+    function showMessage(msg, isError = false) {
+        let oldToast = document.querySelector('.toast-feedback');
+        if (oldToast) oldToast.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast-feedback';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2200);
+    }
+
+    // ---------- 渲染表格：仅显示 ID / 标题 / 地址 ----------
+    function renderApiTable(apiItems, page, pageSize) {
+        const start = (page - 1) * pageSize;
+        const pageItems = apiItems.slice(start, start + pageSize);
+        const isEmpty = apiItems.length === 0;
+
+        if (isEmpty) {
+            return `
+                <div class="data-card">
+                    <div class="empty-state">
+                        📭 暂无 API 接口数据<br>点击右下角「+」开始创建
+                    </div>
+                </div>
+            `;
+        }
+
+        let rows = '';
+        pageItems.forEach(item => {
+            const safeId = escapeHtml(item.id || '');
+            const safeTitle = escapeHtml(item.title || '未命名');
+            rows += `
+                <tr>
+                    <td><span class="id-badge">${safeId}</span></td>
+                    <td>
+                        <strong>${safeTitle}</strong>
+                    </td>
+                    <td style="width:130px">
+                        <div class="action-group">
+                            <button class="action-chip edit" data-raw='${JSON.stringify(item).replace(/'/g, "&#39;")}'>编辑</button>
+                            <button class="action-chip delete" data-id="${safeId}">删除</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        return `
+            <div class="data-card">
+                <table class="responsive-table">
+                    <thead>
+                        <tr><th>ID</th><th>标题</th><th>操作</th></tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // 分页控件渲染
+    function renderPaginationControls(totalItems, currentPage, pageSize) {
+        const totalPages = Math.ceil(totalItems / pageSize);
+        if (totalPages <= 1) return '';
+        let html = `<div class="pagination-bar">`;
+        html += `<button class="page-item ${currentPage === 1 ? 'disabled' : ''}" id="prevPageBtn">← 上一页</button>`;
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="page-item ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+        }
+        html += `<button class="page-item ${currentPage === totalPages ? 'disabled' : ''}" id="nextPageBtn">下一页 →</button>`;
+        html += `</div>`;
+        return html;
+    }
+
+    // 绑定表格内的编辑/删除事件
+    function bindTableEvents() {
+        // 编辑按钮
+        document.querySelectorAll('.action-chip.edit').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                try {
+                    const rawJson = btn.getAttribute('data-raw');
+                    const itemData = JSON.parse(rawJson);
+                    openModal(itemData);
+                } catch (err) {
+                    showMessage('数据解析失败', true);
+                }
+            });
+        });
+        // 删除按钮
+        document.querySelectorAll('.action-chip.delete').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = btn.getAttribute('data-id');
+                if (!confirm(`确认删除 API “${id}” 吗？`)) return;
+                const res = await callBackend({ type: 'delApi', id: id });
+                if (res.code === 200) {
+                    showMessage('删除成功');
+                    await reloadAllData();
+                } else {
+                    showMessage(res.msg || '删除失败', true);
+                }
+            });
+        });
+    }
+
+    // 绑定分页事件
+    function bindPaginationEvents() {
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+        const totalPages = Math.ceil(globalApiList.length / rowsPerPage);
+        if (prevBtn) {
+            prevBtn.onclick = () => {
+                if (currentPageNum > 1) {
+                    currentPageNum--;
+                    refreshUI();
+                }
+            };
+        }
+        if (nextBtn) {
+            nextBtn.onclick = () => {
+                if (currentPageNum < totalPages) {
+                    currentPageNum++;
+                    refreshUI();
+                }
+            };
+        }
+        document.querySelectorAll('.page-item[data-page]').forEach(btn => {
+            btn.onclick = () => {
+                const page = parseInt(btn.getAttribute('data-page'));
+                if (!isNaN(page) && page !== currentPageNum) {
+                    currentPageNum = page;
+                    refreshUI();
+                }
+            };
+        });
+    }
+
+    // 刷新视图 (表格 + 分页)
+    function refreshUI() {
+        const tableHtml = renderApiTable(globalApiList, currentPageNum, rowsPerPage);
+        const paginationHtml = renderPaginationControls(globalApiList.length, currentPageNum, rowsPerPage);
+        document.getElementById('tableWrapper').innerHTML = tableHtml;
+        document.getElementById('paginationWrapper').innerHTML = paginationHtml;
+        bindTableEvents();
+        bindPaginationEvents();
+    }
+
+    // 重新加载数据并重置页码
+    async function reloadAllData() {
+        const res = await callBackend({ type: 'getApi' });
+        if (res.code === 200) {
+            globalApiList = res.data || [];
+            // 若当前页超出范围，调整到最后一页
+            const maxPage = Math.ceil(globalApiList.length / rowsPerPage) || 1;
+            if (currentPageNum > maxPage) currentPageNum = maxPage;
+            refreshUI();
+        } else {
+            document.getElementById('tableWrapper').innerHTML = `<div class="data-card"><div class="empty-state">❌ 加载失败: ${res.msg || '网络错误'}</div></div>`;
+            document.getElementById('paginationWrapper').innerHTML = '';
+        }
+    }
+
+    // ------------------ 模态框：参数仅三列（参数名，类型，说明）无备注 ------------------
+    function openModal(editData = null) {
+        const isEdit = !!(editData && editData.id);
+        // 深拷贝请求/返回参数 （格式 [ [name, type, desc] ... ]）
+        let requestParams = (editData?.request && Array.isArray(editData.request))
+            ? editData.request.map(row => [row[0] || '', row[1] || '', row[2] || ''])
+            : [];
+        let responseParams = (editData?.response && Array.isArray(editData.response))
+            ? editData.response.map(row => [row[0] || '', row[1] || '', row[2] || ''])
+            : [];
+
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal-mask';
+        modalDiv.innerHTML = `
+            <div class="modal-container">
+                <div class="modal-header">${isEdit ? '✏️ 编辑接口' : '➕ 新建接口'}</div>
+                <div class="modal-body">
+                    <div class="field-group"><label>ID *</label><input id="apiId" placeholder="唯一标识，例如 weather_api" value="${escapeHtml(editData?.id || '')}"></div>
+                    <div class="field-group"><label>标题 *</label><input id="apiTitle" value="${escapeHtml(editData?.title || '')}"></div>
+                    <div class="field-group"><label>描述 *</label><textarea id="apiDesc" rows="2">${escapeHtml(editData?.desc || '')}</textarea></div>
+                    <div class="field-group"><label>调用地址 *</label><input id="apiUrl" value="${escapeHtml(editData?.url || '')}" placeholder=""></div>
+                    <div class="field-group"><label>示例地址</label><input id="apiExample" value="${escapeHtml(editData?.example || '')}"></div>
+                    <div class="field-group"><label>请求方式</label><input id="apiMethod" value="${escapeHtml(editData?.method || 'GET')}"></div>
+                    
+                    <div class="param-block">
+                        <div class="param-block-title">📤 请求参数</div>
+                        <div id="requestParamsContainer"></div>
+                        <button type="button" class="add-param-button" id="addReqRowBtn">+ 添加参数</button>
+                    </div>
+
+                    <div class="param-block">
+                        <div class="param-block-title">📥 返回参数</div>
+                        <div id="responseParamsContainer"></div>
+                        <button type="button" class="add-param-button" id="addResRowBtn">+ 添加参数</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal" id="modalCancelBtn">取消</button>
+                    <button class="btn-modal btn-primary-modal" id="modalConfirmBtn">${isEdit ? '保存修改' : '创建'}</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        modalDiv.classList.add('active');
+
+        // 渲染参数表格函数（三列）
+        function renderParamTable(containerId, paramArray) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const render = () => {
+                let html = `<table class="param-inner-table"><thead><tr><th>参数名</th><th>类型</th><th>说明</th><th style="width:40px"></th></tr></thead><tbody>`;
+                paramArray.forEach((row, idx) => {
+                    html += `
+                        <tr data-idx="${idx}">
+                            <td><input type="text" class="param-name-input" value="${escapeHtml(row[0])}" data-rowidx="${idx}" data-col="0" placeholder="name"></td>
+                            <td><input type="text" class="param-type-input" value="${escapeHtml(row[1])}" data-rowidx="${idx}" data-col="1" placeholder="string/int"></td>
+                            <td><input type="text" class="param-desc-input" value="${escapeHtml(row[2])}" data-rowidx="${idx}" data-col="2" placeholder="说明"></td>
+                            <td><button class="remove-param-btn" data-idx="${idx}">✕</button></td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+
+                // 绑定输入事件
+                container.querySelectorAll('input').forEach(inp => {
+                    inp.addEventListener('change', (e) => {
+                        const rowIdx = parseInt(inp.getAttribute('data-rowidx'));
+                        const colIdx = parseInt(inp.getAttribute('data-col'));
+                        if (!isNaN(rowIdx) && paramArray[rowIdx] && !isNaN(colIdx)) {
+                            paramArray[rowIdx][colIdx] = inp.value;
+                        }
+                    });
+                });
+                container.querySelectorAll('.remove-param-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = parseInt(btn.getAttribute('data-idx'));
+                        if (!isNaN(idx)) {
+                            paramArray.splice(idx, 1);
+                            render();
+                        }
+                    });
+                });
+            };
+            render();
+        }
+
+        renderParamTable('requestParamsContainer', requestParams);
+        renderParamTable('responseParamsContainer', responseParams);
+
+        // 添加参数行
+        document.getElementById('addReqRowBtn').onclick = () => {
+            requestParams.push(['', '', '']);
+            renderParamTable('requestParamsContainer', requestParams);
+        };
+        document.getElementById('addResRowBtn').onclick = () => {
+            responseParams.push(['', '', '']);
+            renderParamTable('responseParamsContainer', responseParams);
+        };
+
+        const closeModal = () => modalDiv.remove();
+        document.getElementById('modalCancelBtn').onclick = closeModal;
+
+        document.getElementById('modalConfirmBtn').onclick = async () => {
+            const id = document.getElementById('apiId').value.trim();
+            const title = document.getElementById('apiTitle').value.trim();
+            const desc = document.getElementById('apiDesc').value.trim();
+            const url = document.getElementById('apiUrl').value.trim();
+            const example = document.getElementById('apiExample').value.trim();
+            const method = document.getElementById('apiMethod').value.trim();
+
+            if (!id || !title || !desc || !url || !method) {
+                showMessage('请完整填写 ID、标题、描述、地址和请求方式', true);
+                return;
+            }
+
+            const action = isEdit ? 'setApi' : 'addApi';
+            const payload = {
+                type: action,
+                id, title, desc, url, example, method,
+                request: JSON.stringify(requestParams),
+                response: JSON.stringify(responseParams)
+            };
+            const res = await callBackend(payload);
+            if (res.code === 200) {
+                showMessage(isEdit ? '更新成功' : '创建成功');
+                closeModal();
+                currentPageNum = 1;
+                await reloadAllData();
+            } else {
+                showMessage(res.msg || '操作失败，请检查后端', true);
+            }
+        };
+    }
+
+    // 通用HTML转义
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    // ---------- 事件绑定与初始化 ----------
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        await callBackend({ type: 'clear' });
+        window.location.href = 'index.php?action=admin&type=login';
+    });
+
+    const dropBtn = document.getElementById('navDropdownBtn');
+    const dropPanel = document.getElementById('navDropdownPanel');
+    if (dropBtn && dropPanel) {
+        dropBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropPanel.classList.toggle('open');
+        });
+        document.addEventListener('click', (e) => {
+            if (!dropBtn.contains(e.target) && !dropPanel.contains(e.target)) {
+                dropPanel.classList.remove('open');
+            }
+        });
+    }
+
+    document.getElementById('createFab')?.addEventListener('click', () => openModal(null));
+
+    // 页面启动
+    (async () => {
+        await reloadAllData();
+    })();
+</script>
+</body>
+</html>
